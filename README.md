@@ -11,24 +11,34 @@
 - 데이터는 폰 안(앱 전용 폴더)에만 저장 → 인터넷·계정 필요 없음
 - 다크 모드 지원
 
-## APK 받는 법 (PC에 아무것도 설치 안 해도 됨)
-1. GitHub에 **비공개(Private)** 저장소를 새로 만들고 이 폴더 내용을 올립니다.
-2. 저장소의 **Actions** 탭 → `Build APK` 실행이 끝나면(약 5~8분) 아래 **Artifacts**에서 `LifeBox-apk`를 받습니다.
-3. 압축을 풀어 `app-release.apk`를 폰으로 옮겨 설치합니다. ("출처를 알 수 없는 앱 설치" 허용 필요)
+## 빌드
+`main`에 push 하면 **Actions → Build** 가 자동으로 실행되고, 끝나면 Artifacts에 두 파일이 생깁니다.
+- `LifeBox-apk-N` : 폰에 바로 설치하는 APK
+- `LifeBox-aab-N` : 구글 플레이스토어 업로드용 App Bundle
 
-코드를 고쳐 다시 push 하면 새 APK가 만들어지고, 덮어 설치해도 기록이 유지됩니다.
+빌드 번호(versionCode)는 실행 번호로 자동 증가합니다.
 
-## PC에서 직접 실행하려면
+## 서명 키 (중요)
+릴리스 서명 키는 저장소에 올리지 않고 **Settings → Secrets and variables → Actions** 에 넣습니다.
+- `KEYSTORE_BASE64` : upload-keystore.jks 를 base64로 바꾼 값
+- `KEYSTORE_PASSWORD` : 키 비밀번호 (별칭은 `upload`)
+
+Secrets가 없으면 임시 디버그 키로 빌드되며, 그 APK는 테스트용입니다.
+키 파일과 비밀번호는 따로 안전하게 백업해 두세요.
+
+## 플레이스토어
+- 패키지 이름: `io.github.rhsung1004.lifebox` (첫 업로드 후에는 바꿀 수 없음)
+- 개인정보처리방침: [PRIVACY.md](PRIVACY.md)
+- 데이터 보안 양식: 수집·공유하는 데이터 없음
+
+## PC에서 실행
 ```bash
-flutter create --platforms=android --org com.lifebox --project-name lifebox .
+flutter pub get
 flutter run
 ```
-폰에 이미 Actions 버전이 깔려 있다면, 서명 키가 달라 덮어 설치가 안 됩니다.
-`ci/debug.keystore`를 `%USERPROFILE%\.android\debug.keystore`(Windows)에 복사해 두면 같은 키로 빌드됩니다.
 
 ## 주의
-- **앱을 삭제하면 기록과 사진도 같이 지워집니다.** (클라우드 백업은 다음 단계에서 추가 예정)
-- `ci/debug.keystore`는 서명 키라서 저장소는 비공개로 두세요.
+- 앱을 삭제하면 기록과 사진도 같이 지워집니다. (기기의 Google 백업이 켜져 있으면 일부 복원될 수 있음)
 
 ## 구조
 ```
