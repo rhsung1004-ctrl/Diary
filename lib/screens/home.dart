@@ -6,6 +6,7 @@ import 'bucket.dart';
 import 'diary.dart';
 import 'goals.dart';
 import 'settings.dart';
+import 'stats.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
@@ -19,6 +20,12 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('LifeBox'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.insights_outlined),
+            tooltip: '통계',
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsScreen())),
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: '설정',

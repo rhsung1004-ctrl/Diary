@@ -5,6 +5,7 @@ import '../common.dart';
 import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
+import 'portfolio.dart';
 
 String careerPeriod(CareerItem c) {
   if (c.startDate == null) return '';
@@ -26,7 +27,23 @@ class _CareerScreenState extends State<CareerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('커리어 · 포트폴리오')),
+      appBar: AppBar(
+        title: const Text('커리어 · 포트폴리오'),
+        actions: [
+          IconButton(
+            tooltip: '내 프로필',
+            icon: const Icon(Icons.badge_outlined),
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileEditor())),
+          ),
+          IconButton(
+            tooltip: 'PDF로 내보내기',
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            onPressed: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const PortfolioExportScreen())),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_career',
         onPressed: () => openCareerEditor(context, null),
