@@ -119,9 +119,13 @@ class LockOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScaffoldMessenger(
-      child: Navigator(
-        onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => const _LockScreen()),
+    // 잠금 화면 전용 Navigator는 앱 본 화면의 HeroController를 같이 쓰면 안 됨.
+    // (같이 쓰면 잠금을 푼 뒤 새 화면을 열 때 전환이 깨져 검은 화면이 됨)
+    return HeroControllerScope.none(
+      child: ScaffoldMessenger(
+        child: Navigator(
+          onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => const _LockScreen()),
+        ),
       ),
     );
   }
