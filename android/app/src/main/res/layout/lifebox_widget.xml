@@ -76,7 +76,8 @@
         android:progressBackgroundTint="@color/widget_track"
         android:progressTint="@color/widget_accent" />
 
-    <View
+    <!-- 빈 공간 (위젯에서는 View 대신 FrameLayout만 허용됨) -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
