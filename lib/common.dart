@@ -5,6 +5,7 @@ const _weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 String weekday(DateTime d) => _weekdays[d.weekday - 1];
 String fmtDate(DateTime d) => '${d.year}.${two(d.month)}.${two(d.day)}';
 String fmtDateW(DateTime d) => '${fmtDate(d)} (${weekday(d)})';
+String fmtDateTime(DateTime d) => '${fmtDateW(d)} ${two(d.hour)}:${two(d.minute)}';
 String fmtMonth(DateTime d) => '${d.year}.${two(d.month)}';
 bool sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;

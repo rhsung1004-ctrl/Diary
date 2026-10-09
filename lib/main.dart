@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'backup.dart';
 import 'screens/bucket.dart';
 import 'screens/career.dart';
 import 'screens/diary.dart';
@@ -12,6 +15,8 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppStore.instance.load();
   runApp(const LifeBoxApp());
+  // 구글 로그인 복구 → 필요하면 자동 백업 (화면 표시를 막지 않음)
+  unawaited(BackupService.instance.init().then((_) => BackupService.instance.autoBackupIfNeeded()));
 }
 
 class LifeBoxApp extends StatelessWidget {
@@ -49,8 +54,28 @@ class Shell extends StatefulWidget {
   State<Shell> createState() => _ShellState();
 }
 
-class _ShellState extends State<Shell> {
+class _ShellState extends State<Shell> with WidgetsBindingObserver {
   int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 앱을 나갈 때 자동 백업
+    if (state == AppLifecycleState.paused) {
+      BackupService.instance.autoBackupIfNeeded();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

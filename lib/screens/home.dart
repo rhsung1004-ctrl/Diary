@@ -5,6 +5,7 @@ import '../store.dart';
 import 'bucket.dart';
 import 'diary.dart';
 import 'goals.dart';
+import 'settings.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
@@ -15,7 +16,17 @@ class HomeScreen extends StatelessWidget {
     final store = AppStore.instance;
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('LifeBox')),
+      appBar: AppBar(
+        title: const Text('LifeBox'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: '설정',
+            onPressed: () => Navigator.push(
+                context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
+          ),
+        ],
+      ),
       body: ListenableBuilder(
         listenable: store,
         builder: (context, _) {

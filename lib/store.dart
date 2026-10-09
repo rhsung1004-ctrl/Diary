@@ -31,11 +31,7 @@ class AppStore extends ChangeNotifier {
     var loadedOk = true;
     if (await _dataFile.exists()) {
       try {
-        final m = jsonDecode(await _dataFile.readAsString()) as Map<String, dynamic>;
-        buckets = _list(m['buckets'], BucketItem.fromJson);
-        goals = _list(m['goals'], Goal.fromJson);
-        diaries = _list(m['diaries'], DiaryEntry.fromJson);
-        careers = _list(m['careers'], CareerItem.fromJson);
+        applyMap(jsonDecode(await _dataFile.readAsString()) as Map<String, dynamic>);
       } catch (e) {
         // 파일이 깨졌으면 지우지 않고 옆에 보관해 둔다
         loadedOk = false;
@@ -51,15 +47,46 @@ class AppStore extends ChangeNotifier {
       ? v.map((e) => f(Map<String, dynamic>.from(e as Map))).toList()
       : <T>[];
 
+  String get dirPath => _dir.path;
+
+  Map<String, dynamic> toMap() => {
+        'version': 1,
+        'buckets': buckets.map((e) => e.toJson()).toList(),
+        'goals': goals.map((e) => e.toJson()).toList(),
+        'diaries': diaries.map((e) => e.toJson()).toList(),
+        'careers': careers.map((e) => e.toJson()).toList(),
+      };
+
+  void applyMap(Map<String, dynamic> m) {
+    buckets = _list(m['buckets'], BucketItem.fromJson);
+    goals = _list(m['goals'], Goal.fromJson);
+    diaries = _list(m['diaries'], DiaryEntry.fromJson);
+    careers = _list(m['careers'], CareerItem.fromJson);
+  }
+
+  /// 모든 기록이 쓰고 있는 사진 파일 이름
+  Set<String> get usedPhotos => {
+        ...buckets.expand((e) => e.photos),
+        ...diaries.expand((e) => e.photos),
+        ...careers.expand((e) => e.photos),
+      };
+
+  /// 마지막으로 기록이 바뀐 시각 (자동 백업 판단용)
+  Future<DateTime?> dataModifiedAt() async =>
+      await _dataFile.exists() ? await _dataFile.lastModified() : null;
+
+  /// 백업에서 복원: 현재 데이터는 data.before-restore.json 으로 남겨둠
+  Future<void> replaceAll(Map<String, dynamic> m) async {
+    if (await _dataFile.exists()) {
+      await _dataFile.copy('${_dir.path}/data.before-restore.json');
+    }
+    applyMap(m);
+    await save();
+  }
+
   Future<void> save() async {
     final tmp = File('${_dir.path}/data.json.tmp');
-    await tmp.writeAsString(jsonEncode({
-      'version': 1,
-      'buckets': buckets.map((e) => e.toJson()).toList(),
-      'goals': goals.map((e) => e.toJson()).toList(),
-      'diaries': diaries.map((e) => e.toJson()).toList(),
-      'careers': careers.map((e) => e.toJson()).toList(),
-    }));
+    await tmp.writeAsString(jsonEncode(toMap()));
     await tmp.rename(_dataFile.path); // 저장 중 꺼져도 기존 파일이 안 깨지게
     notifyListeners();
   }
@@ -77,11 +104,7 @@ class AppStore extends ChangeNotifier {
 
   /// 편집 중 취소하거나 지운 사진 파일을 앱 시작 시 정리
   Future<void> _cleanUnusedPhotos() async {
-    final used = <String>{
-      ...buckets.expand((e) => e.photos),
-      ...diaries.expand((e) => e.photos),
-      ...careers.expand((e) => e.photos),
-    };
+    final used = usedPhotos;
     try {
       await for (final ent in photoDir.list()) {
         if (ent is File) {

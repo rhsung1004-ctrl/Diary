@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 구글 드라이브 백업 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="LifeBox"
         android:name="${applicationName}"
