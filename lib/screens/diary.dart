@@ -4,22 +4,42 @@ import '../common.dart';
 import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
+import 'diary_calendar.dart';
+import 'diary_prompts.dart';
 
-class DiaryScreen extends StatelessWidget {
+class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
+
+  @override
+  State<DiaryScreen> createState() => _DiaryScreenState();
+}
+
+class _DiaryScreenState extends State<DiaryScreen> {
+  bool _calendar = false;
 
   @override
   Widget build(BuildContext context) {
     final store = AppStore.instance;
     return Scaffold(
-      appBar: AppBar(title: const Text('일기')),
+      appBar: AppBar(
+        title: const Text('일기'),
+        actions: [
+          IconButton(
+            tooltip: _calendar ? '목록으로 보기' : '달력으로 보기',
+            icon: Icon(_calendar ? Icons.view_agenda_outlined : Icons.calendar_month_outlined),
+            onPressed: () => setState(() => _calendar = !_calendar),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'fab_diary',
         onPressed: () => openDiaryEditor(context, null),
         icon: const Icon(Icons.edit_outlined),
         label: const Text('오늘 일기'),
       ),
-      body: ListenableBuilder(
+      body: _calendar
+          ? const DiaryCalendar()
+          : ListenableBuilder(
         listenable: store,
         builder: (context, _) {
           final list = List.of(store.diaries)
@@ -156,10 +176,11 @@ class DiaryView extends StatelessWidget {
 }
 
 /// 일기 쓰기/수정. 삭제되면 true 를 돌려줌
-Future<void> openDiaryEditor(BuildContext context, DiaryEntry? entry, {DateTime? date}) async {
+Future<void> openDiaryEditor(BuildContext context, DiaryEntry? entry,
+    {DateTime? date, DiaryEntry? draft}) async {
   final deleted = await Navigator.push<bool>(
     context,
-    MaterialPageRoute(builder: (_) => DiaryEditor(entry: entry, date: date)),
+    MaterialPageRoute(builder: (_) => DiaryEditor(entry: entry, date: date, draft: draft)),
   );
   // 읽기 화면에서 열었다가 삭제했으면 읽기 화면도 닫기
   if (deleted == true && context.mounted && entry != null) Navigator.pop(context);
@@ -168,14 +189,15 @@ Future<void> openDiaryEditor(BuildContext context, DiaryEntry? entry, {DateTime?
 class DiaryEditor extends StatefulWidget {
   final DiaryEntry? entry;
   final DateTime? date;
-  const DiaryEditor({super.key, this.entry, this.date});
+  final DiaryEntry? draft; // 새 일기를 미리 채워서 열 때 (버킷 달성 등)
+  const DiaryEditor({super.key, this.entry, this.date, this.draft});
 
   @override
   State<DiaryEditor> createState() => _DiaryEditorState();
 }
 
 class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> {
-  late final DiaryEntry d = widget.entry?.copy() ?? DiaryEntry(date: widget.date);
+  late final DiaryEntry d = widget.entry?.copy() ?? widget.draft ?? DiaryEntry(date: widget.date);
   late final _title = TextEditingController(text: d.title);
   late final _body = TextEditingController(text: d.body);
   bool get isNew => widget.entry == null;
@@ -248,9 +270,24 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 12),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: const Icon(Icons.lightbulb_outline, size: 18),
+            label: const Text('질문으로 쓰기'),
+            onPressed: () async {
+              final text = await pickDiaryPrompt(context);
+              if (text == null) return;
+              final cur = _body.text;
+              _body.text = cur.trim().isEmpty ? text : '${cur.trimRight()}\n\n$text';
+              _body.selection = TextSelection.collapsed(offset: _body.text.length);
+              markDirty();
+            },
+          ),
+        ),
         TextField(
           controller: _body,
-          autofocus: isNew,
+          autofocus: isNew && widget.draft == null,
           minLines: 10,
           maxLines: null,
           keyboardType: TextInputType.multiline,

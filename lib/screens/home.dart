@@ -6,7 +6,9 @@ import 'bucket.dart';
 import 'diary.dart';
 import 'goals.dart';
 import 'settings.dart';
+import 'search.dart';
 import 'stats.dart';
+import 'year_review.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
@@ -20,6 +22,12 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('LifeBox'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: '검색',
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
+          ),
           IconButton(
             icon: const Icon(Icons.insights_outlined),
             tooltip: '통계',
@@ -42,6 +50,12 @@ class HomeScreen extends StatelessWidget {
           final activeGoals = store.goals.where((g) => !g.isComplete).toList()
             ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
           final todayDiaries = store.diaries.where((e) => sameDay(e.date, now)).toList();
+          final pastToday = store.diaries
+              .where((e) => e.date.month == now.month && e.date.day == now.day && e.date.year < now.year)
+              .toList()
+            ..sort((a, b) => b.date.compareTo(a.date));
+          // 12월·1월엔 결산 카드 안내
+          final reviewYear = now.month == 12 ? now.year : (now.month == 1 ? now.year - 1 : null);
           final recentDone = store.buckets.where((b) => b.done && b.doneAt != null).toList()
             ..sort((a, b) => b.doneAt!.compareTo(a.doneAt!));
 
@@ -81,6 +95,32 @@ class HomeScreen extends StatelessWidget {
               )
             else
               ...todayDiaries.map((e) => DiaryCard(entry: e)),
+            if (pastToday.isNotEmpty) ...[
+              const SectionTitle('📅 지난 오늘'),
+              for (final e in pastToday) ...[
+                Padding(
+                  padding: const EdgeInsets.only(left: 4, bottom: 2),
+                  child: Text('${now.year - e.date.year}년 전 오늘',
+                      style: t.textTheme.labelMedium?.copyWith(color: t.colorScheme.primary)),
+                ),
+                DiaryCard(entry: e),
+              ],
+            ],
+            if (reviewYear != null) ...[
+              const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                color: t.colorScheme.tertiaryContainer,
+                child: ListTile(
+                  leading: const Text('🎁', style: TextStyle(fontSize: 28)),
+                  title: Text('$reviewYear년 결산 카드'),
+                  subtitle: const Text('한 해 기록을 카드 한 장으로 돌아보세요'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => YearReviewScreen(initialYear: reviewYear))),
+                ),
+              ),
+            ],
             SectionTitle('진행 중인 목표', onMore: activeGoals.isEmpty ? null : () => onNavigate(2)),
             if (activeGoals.isEmpty)
               _Hint('목표를 세우면 여기에서 진행률을 볼 수 있어요', () => openGoalEditor(context, null))

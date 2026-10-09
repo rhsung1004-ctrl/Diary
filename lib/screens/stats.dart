@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../common.dart';
 import '../models.dart';
 import '../store.dart';
+import 'year_review.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -18,7 +19,17 @@ class _StatsScreenState extends State<StatsScreen> {
   Widget build(BuildContext context) {
     final store = AppStore.instance;
     return Scaffold(
-      appBar: AppBar(title: const Text('통계')),
+      appBar: AppBar(
+        title: const Text('통계'),
+        actions: [
+          TextButton.icon(
+            icon: const Icon(Icons.card_giftcard_outlined),
+            label: const Text('연말 결산'),
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const YearReviewScreen())),
+          ),
+        ],
+      ),
       body: ListenableBuilder(
         listenable: store,
         builder: (context, _) {

@@ -4,6 +4,7 @@ import '../common.dart';
 import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
+import 'diary.dart';
 
 class BucketScreen extends StatefulWidget {
   const BucketScreen({super.key});
@@ -109,10 +110,8 @@ class BucketTile extends StatelessWidget {
             b.done = v ?? false;
             b.doneAt = b.done ? DateTime.now() : null;
             await AppStore.instance.save();
-            if (b.done && context.mounted) {
-              toast(context, '🎉 "${b.title}" 달성!',
-                  action: SnackBarAction(
-                      label: '사진 남기기', onPressed: () => openBucketEditor(context, b)));
+            if (b.done && context.mounted && await askBucketDiary(context, b) && context.mounted) {
+              openDiaryEditor(context, null, draft: bucketDiaryDraft(b));
             }
           },
         ),
@@ -164,8 +163,16 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
       ..title = _title.text.trim()
       ..category = _category.text.trim()
       ..note = _note.text.trim();
+    final newlyDone = d.done && !(widget.item?.done ?? false);
     await AppStore.instance.upsertBucket(d);
     dirty = false;
+    if (!mounted) return;
+    if (newlyDone && await askBucketDiary(context, d) && mounted) {
+      // 수정 화면 대신 일기 쓰기 화면으로 바로 이동
+      Navigator.pushReplacement(context,
+          MaterialPageRoute(builder: (_) => DiaryEditor(draft: bucketDiaryDraft(d))));
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
 
@@ -235,3 +242,46 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
     ));
   }
 }
+
+/// 버킷 달성 시 일기로 남길지 물어봄
+Future<bool> askBucketDiary(BuildContext context, BucketItem b) async {
+  final r = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) {
+      final t = Theme.of(ctx);
+      return SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Text('🎉', style: TextStyle(fontSize: 48)),
+            const SizedBox(height: 8),
+            Text('"${b.title}" 달성!',
+                textAlign: TextAlign.center,
+                style: t.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Text(
+              b.photos.isEmpty ? '이 순간을 일기로 남겨 둘까요?' : '이 순간을 일기로 남겨 둘까요?\n버킷에 넣은 사진도 함께 담아 드려요.',
+              textAlign: TextAlign.center,
+              style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('일기 쓰기')),
+            ),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('나중에')),
+          ]),
+        ),
+      );
+    },
+  );
+  return r ?? false;
+}
+
+DiaryEntry bucketDiaryDraft(BucketItem b) => DiaryEntry(
+      date: b.doneAt ?? DateTime.now(),
+      title: '🎉 ${b.title} 달성',
+      mood: '😆',
+      photos: List.of(b.photos),
+    );
