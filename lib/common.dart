@@ -61,17 +61,21 @@ void toast(BuildContext context, String msg, {SnackBarAction? action}) {
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String text;
-  const EmptyState({super.key, required this.icon, required this.text});
+  final double top;
+  const EmptyState({super.key, required this.icon, required this.text, this.top = 64});
 
   @override
   Widget build(BuildContext context) {
     final c = Theme.of(context).colorScheme.onSurfaceVariant;
     return Padding(
-      padding: const EdgeInsets.only(top: 64),
-      child: Column(children: [
+      padding: EdgeInsets.only(top: top),
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
         Icon(icon, size: 48, color: c),
         const SizedBox(height: 12),
-        Text(text, textAlign: TextAlign.center, style: TextStyle(color: c)),
+        SizedBox(
+          width: double.infinity,
+          child: Text(text, textAlign: TextAlign.center, style: TextStyle(color: c)),
+        ),
       ]),
     );
   }

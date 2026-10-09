@@ -28,7 +28,13 @@ class DiaryScreen extends StatelessWidget {
               return c != 0 ? c : b.createdAt.compareTo(a.createdAt);
             });
           if (list.isEmpty) {
-            return const EmptyState(icon: Icons.menu_book_outlined, text: '첫 일기를 써 보세요\n사진도 함께 남길 수 있어요');
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.only(bottom: 80), // 하단 버튼만큼 살짝 위로
+                child: EmptyState(
+                    icon: Icons.menu_book_outlined, text: '첫 일기를 써 보세요\n사진도 함께 남길 수 있어요', top: 0),
+              ),
+            );
           }
           final children = <Widget>[];
           String? month;
