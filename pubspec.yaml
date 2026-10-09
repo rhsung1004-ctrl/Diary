@@ -1,0 +1,30 @@
+name: lifebox
+description: 버킷리스트, 목표, 일기, 커리어를 한곳에 기록하는 개인 앱
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  path_provider: ^2.1.4
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.1
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/icon.png
+  adaptive_icon_background: "#3D7A6E"
+  adaptive_icon_foreground: assets/icon_foreground.png
+
+flutter:
+  uses-material-design: true
