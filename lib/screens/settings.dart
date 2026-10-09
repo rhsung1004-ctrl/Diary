@@ -7,7 +7,9 @@ import '../lock.dart';
 import '../prefs.dart';
 import '../reminder.dart';
 import '../theme.dart';
+import '../i18n.dart';
 
+const _langNames = {'ko': '한국어', 'en': 'English', 'ja': '日本語'};
 const _privacyUrl = 'https://github.com/rhsung1004-ctrl/Diary/blob/main/PRIVACY.md';
 
 class SettingsScreen extends StatelessWidget {
@@ -16,18 +18,18 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('설정')),
-      body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: const [
-        SectionTitle('화면'),
-        _AppearanceSection(),
-        SectionTitle('알림'),
-        _ReminderSection(),
-        SectionTitle('보안'),
-        _LockSection(),
-        SectionTitle('구글 드라이브 백업'),
-        _BackupSection(),
-        SectionTitle('정보'),
-        _AboutSection(),
+      appBar: AppBar(title: Text(tr.settings)),
+      body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
+        SectionTitle(tr.display),
+        const _AppearanceSection(),
+        SectionTitle(tr.notifications),
+        const _ReminderSection(),
+        SectionTitle(tr.security),
+        const _LockSection(),
+        SectionTitle(tr.driveBackup),
+        const _BackupSection(),
+        SectionTitle(tr.about),
+        const _AboutSection(),
       ]),
     );
   }
@@ -49,7 +51,16 @@ class _AppearanceSection extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const ListTile(title: Text('테마 색')),
+              ListTile(
+                leading: const Icon(Icons.language),
+                title: Text(tr.language),
+                subtitle: Text(prefs.language == 'system'
+                    ? '${tr.languageSystem} (${_langNames[appLang]})'
+                    : _langNames[prefs.language] ?? prefs.language),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => _pickLanguage(context),
+              ),
+              ListTile(title: Text(tr.themeColor)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Wrap(spacing: 12, runSpacing: 12, children: [
@@ -72,15 +83,15 @@ class _AppearanceSection extends StatelessWidget {
                 ]),
               ),
               const SizedBox(height: 12),
-              const ListTile(title: Text('다크 모드')),
+              ListTile(title: Text(tr.darkMode)),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: SegmentedButton<ThemeMode>(
                   showSelectedIcon: false,
-                  segments: const [
-                    ButtonSegment(value: ThemeMode.system, label: Text('기기 설정')),
-                    ButtonSegment(value: ThemeMode.light, label: Text('밝게')),
-                    ButtonSegment(value: ThemeMode.dark, label: Text('어둡게')),
+                  segments: [
+                    ButtonSegment(value: ThemeMode.system, label: Text(tr.modeSystem)),
+                    ButtonSegment(value: ThemeMode.light, label: Text(tr.modeLight)),
+                    ButtonSegment(value: ThemeMode.dark, label: Text(tr.modeDark)),
                   ],
                   selected: {prefs.themeMode},
                   onSelectionChanged: (s) => prefs.update((p) => p.themeMode = s.first),
@@ -88,13 +99,13 @@ class _AppearanceSection extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               ListTile(
-                title: const Text('글꼴'),
+                title: Text(tr.font),
                 subtitle: Text(font.label),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => _pickFont(context),
               ),
               ListTile(
-                title: const Text('글자 크기'),
+                title: Text(tr.textSize),
                 trailing: Text('${(prefs.textScale * 100).round()}%'),
               ),
               Slider(
@@ -112,6 +123,30 @@ class _AppearanceSection extends StatelessWidget {
     );
   }
 
+  void _pickLanguage(BuildContext context) {
+    final prefs = AppPrefs.instance;
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          for (final code in ['system', ...supportedLangs])
+            ListTile(
+              leading: Icon(prefs.language == code
+                  ? Icons.radio_button_checked
+                  : Icons.radio_button_unchecked),
+              title: Text(code == 'system' ? tr.languageSystem : _langNames[code]!),
+              onTap: () async {
+                Navigator.pop(ctx);
+                await prefs.update((p) => p.language = code);
+                await Reminder.reschedule(); // 알림 문구도 새 언어로
+              },
+            ),
+        ]),
+      ),
+    );
+  }
+
   void _pickFont(BuildContext context) {
     final prefs = AppPrefs.instance;
     showModalBottomSheet<void>(
@@ -119,9 +154,9 @@ class _AppearanceSection extends StatelessWidget {
       showDragHandle: true,
       builder: (ctx) => SafeArea(
         child: ListView(shrinkWrap: true, children: [
-          for (final f in fontOptions)
+          for (final f in fontsFor(appLang))
             ListTile(
-              leading: Icon(prefs.font == f.key
+              leading: Icon(fontByKey(prefs.font).key == f.key
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked),
               onTap: () {
@@ -130,13 +165,12 @@ class _AppearanceSection extends StatelessWidget {
               },
               title: Text(f.label,
                   style: TextStyle(fontFamily: f.family, fontSize: 16 * f.sizeFactor)),
-              subtitle: Text('오늘 하루도 기록해 볼까요? 123 ABC',
+              subtitle: Text(tr.fontSample,
                   style: TextStyle(fontFamily: f.family, fontSize: 14 * f.sizeFactor)),
             ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-            child: Text('모든 글꼴은 SIL 오픈 폰트 라이선스로 무료 사용 가능해요.',
-                style: TextStyle(fontSize: 12)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: Text(tr.fontLicenseNote, style: const TextStyle(fontSize: 12)),
           ),
         ]),
       ),
@@ -150,7 +184,7 @@ class _ReminderSection extends StatelessWidget {
 
   Future<void> _toggle(BuildContext context, bool on) async {
     if (on && !await AppLock.instance.runExternal(Reminder.requestPermission)) {
-      if (context.mounted) toast(context, '알림 권한이 꺼져 있어요. 휴대폰 설정에서 허용해 주세요');
+      if (context.mounted) toast(context, tr.notifPermissionOff);
       return;
     }
     await AppPrefs.instance.update((p) => p.reminderOn = on);
@@ -179,14 +213,14 @@ class _ReminderSection extends StatelessWidget {
       builder: (context, _) => Card(
         child: Column(children: [
           SwitchListTile(
-            title: const Text('매일 일기 알림'),
-            subtitle: const Text('그날 일기를 이미 썼으면 울리지 않아요'),
+            title: Text(tr.dailyReminder),
+            subtitle: Text(tr.dailyReminderSub),
             value: prefs.reminderOn,
             onChanged: (v) => _toggle(context, v),
           ),
           if (prefs.reminderOn)
             ListTile(
-              title: const Text('알림 시간'),
+              title: Text(tr.reminderTime),
               trailing: Text(
                 TimeOfDay(hour: prefs.reminderHour, minute: prefs.reminderMinute).format(context),
                 style: Theme.of(context).textTheme.titleMedium,
@@ -223,9 +257,9 @@ class _LockSectionState extends State<_LockSection> {
     if (email == null) {
       final go = await confirmDialog(
         context,
-        '구글 계정이 연결되지 않았어요',
-        'PIN을 잊었을 때 잠금을 풀 방법이 없어요.\n아래 "구글 드라이브 백업"에서 계정을 먼저 연결하는 걸 추천해요.\n\n그래도 잠금을 켤까요?',
-        '켜기',
+        tr.lockNoAccountTitle,
+        tr.lockNoAccountBody,
+        tr.turnOn,
       );
       if (!go || !mounted) return;
     }
@@ -233,7 +267,7 @@ class _LockSectionState extends State<_LockSection> {
         context, MaterialPageRoute(builder: (_) => const PinSetupScreen()));
     if (pin == null) return;
     await AppLock.instance.setPin(pin, recoveryEmail: email);
-    if (mounted) toast(context, '앱 잠금을 켰어요');
+    if (mounted) toast(context, tr.lockOnDone);
   }
 
   Future<void> _changePin() async {
@@ -242,7 +276,7 @@ class _LockSectionState extends State<_LockSection> {
     if (pin == null) return;
     await AppLock.instance.setPin(pin,
         recoveryEmail: BackupService.instance.account?.email ?? AppPrefs.instance.lockRecoveryEmail);
-    if (mounted) toast(context, 'PIN을 바꿨어요');
+    if (mounted) toast(context, tr.pinChanged);
   }
 
   Future<void> _toggleBio(bool v) async {
@@ -258,26 +292,26 @@ class _LockSectionState extends State<_LockSection> {
       builder: (context, _) => Card(
         child: Column(children: [
           SwitchListTile(
-            title: const Text('앱 잠금'),
-            subtitle: const Text('앱을 열 때 PIN을 물어봐요'),
+            title: Text(tr.appLock),
+            subtitle: Text(tr.appLockSub),
             value: prefs.lockEnabled,
             onChanged: (v) async {
               if (v) {
                 await _enable();
-              } else if (await confirmDialog(context, '앱 잠금을 끌까요?', '', '끄기')) {
+              } else if (await confirmDialog(context, tr.appLockOffTitle, '', tr.turnOff)) {
                 await AppLock.instance.disable();
               }
             },
           ),
           if (prefs.lockEnabled) ...[
             ListTile(
-              title: const Text('PIN 변경'),
+              title: Text(tr.changePin),
               trailing: const Icon(Icons.chevron_right),
               onTap: _changePin,
             ),
             if (_bioAvailable)
               SwitchListTile(
-                title: const Text('지문·얼굴 인식으로 열기'),
+                title: Text(tr.useBiometric),
                 value: prefs.biometric,
                 onChanged: _toggleBio,
               ),
@@ -285,8 +319,8 @@ class _LockSectionState extends State<_LockSection> {
               dense: true,
               leading: const Icon(Icons.info_outline, size: 20),
               title: Text(prefs.lockRecoveryEmail == null
-                  ? 'PIN을 잊으면 복구할 수 없어요'
-                  : 'PIN을 잊으면 ${prefs.lockRecoveryEmail} 계정으로 풀 수 있어요'),
+                  ? tr.pinNoRecovery
+                  : tr.pinRecoveryWith(prefs.lockRecoveryEmail!)),
             ),
           ],
         ]),
@@ -308,11 +342,11 @@ class _BackupSection extends StatelessWidget {
         final t = Theme.of(context);
         final acc = svc.account;
         if (!svc.configured) {
-          return const Card(
+          return Card(
             child: ListTile(
-              leading: Icon(Icons.cloud_off_outlined),
-              title: Text('백업 기능 준비 중'),
-              subtitle: Text('구글 연동 설정이 끝나면 사용할 수 있어요.'),
+              leading: const Icon(Icons.cloud_off_outlined),
+              title: Text(tr.backupPreparing),
+              subtitle: Text(tr.backupPreparingSub),
             ),
           );
         }
@@ -321,16 +355,16 @@ class _BackupSection extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('구글 계정을 연결하면 기록과 사진을 내 구글 드라이브에 보관해요.',
+                Text(tr.backupIntro,
                     style: t.textTheme.bodyLarge),
                 const SizedBox(height: 8),
-                Text('드라이브의 숨김 앱 폴더에 저장되어 이 앱만 볼 수 있고, 개발자에게는 전송되지 않아요.',
+                Text(tr.backupPrivacy,
                     style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
                 const SizedBox(height: 16),
                 FilledButton.icon(
                   icon: const Icon(Icons.login),
-                  label: const Text('Google 계정 연결'),
-                  onPressed: svc.busy ? null : () => _run(context, svc.connect, '연결됐어요'),
+                  label: Text(tr.connectGoogle),
+                  onPressed: svc.busy ? null : () => _run(context, svc.connect, tr.connected),
                 ),
               ]),
             ),
@@ -345,14 +379,14 @@ class _BackupSection extends StatelessWidget {
                 subtitle: Text(acc.email),
                 trailing: TextButton(
                   onPressed: svc.busy ? null : () => _disconnect(context),
-                  child: const Text('연결 해제'),
+                  child: Text(tr.disconnect),
                 ),
               ),
               const Divider(height: 1),
               ListTile(
                 leading: const Icon(Icons.cloud_done_outlined),
-                title: const Text('마지막 백업'),
-                subtitle: Text(svc.lastBackup == null ? '아직 없어요' : fmtDateTime(svc.lastBackup!)),
+                title: Text(tr.lastBackup),
+                subtitle: Text(svc.lastBackup == null ? tr.noneYet : fmtDateTime(svc.lastBackup!)),
               ),
               if (svc.busy)
                 Padding(
@@ -369,15 +403,15 @@ class _BackupSection extends StatelessWidget {
                   Expanded(
                     child: FilledButton.icon(
                       icon: const Icon(Icons.cloud_upload_outlined),
-                      label: const Text('지금 백업'),
-                      onPressed: svc.busy ? null : () => _run(context, svc.backup, '백업했어요'),
+                      label: Text(tr.backupNow),
+                      onPressed: svc.busy ? null : () => _run(context, svc.backup, tr.backedUp),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.cloud_download_outlined),
-                      label: const Text('복원'),
+                      label: Text(tr.restore),
                       onPressed: svc.busy ? null : () => _restore(context),
                     ),
                   ),
@@ -387,8 +421,8 @@ class _BackupSection extends StatelessWidget {
           ),
           Card(
             child: SwitchListTile(
-              title: const Text('자동 백업'),
-              subtitle: const Text('기록이 바뀌었으면 앱을 나갈 때 알아서 백업해요'),
+              title: Text(tr.autoBackup),
+              subtitle: Text(tr.autoBackupSub),
               value: svc.autoBackup,
               onChanged: svc.setAutoBackup,
             ),
@@ -408,9 +442,8 @@ class _BackupSection extends StatelessWidget {
   }
 
   Future<void> _disconnect(BuildContext context) async {
-    final ok = await confirmDialog(context, '연결을 해제할까요?',
-        '드라이브에 있는 백업은 지워지지 않아요. 다시 연결하면 복원할 수 있어요.', '해제');
-    if (ok && context.mounted) await _run(context, BackupService.instance.disconnect, '연결을 해제했어요');
+    final ok = await confirmDialog(context, tr.disconnectTitle, tr.disconnectBody, tr.disconnectAction);
+    if (ok && context.mounted) await _run(context, BackupService.instance.disconnect, tr.disconnected);
   }
 
   Future<void> _restore(BuildContext context) async {
@@ -424,16 +457,16 @@ class _BackupSection extends StatelessWidget {
     }
     if (!context.mounted) return;
     if (remoteTime == null) {
-      toast(context, '드라이브에 백업이 없어요');
+      toast(context, tr.bkNoBackup);
       return;
     }
     final ok = await confirmDialog(
       context,
-      '백업으로 복원할까요?',
-      '${fmtDateTime(remoteTime)} 백업으로 지금 폰의 기록을 바꿔요.\n그 이후에 쓴 기록은 사라질 수 있어요.',
-      '복원',
+      tr.restoreTitle,
+      tr.restoreBody(fmtDateTime(remoteTime)),
+      tr.restore,
     );
-    if (ok && context.mounted) await _run(context, svc.restore, '복원했어요');
+    if (ok && context.mounted) await _run(context, svc.restore, tr.restored);
   }
 }
 
@@ -447,16 +480,16 @@ class _AboutSection extends StatelessWidget {
       child: Column(children: [
         ListTile(
           leading: const Icon(Icons.privacy_tip_outlined),
-          title: const Text('개인정보처리방침'),
-          subtitle: const Text('주소 복사'),
+          title: Text(tr.privacyPolicy),
+          subtitle: Text(tr.copyAddress),
           onTap: () {
             Clipboard.setData(const ClipboardData(text: _privacyUrl));
-            toast(context, '주소를 복사했어요. 브라우저에 붙여넣어 보세요');
+            toast(context, tr.addressCopied);
           },
         ),
         ListTile(
           leading: const Icon(Icons.description_outlined),
-          title: const Text('오픈소스 라이선스'),
+          title: Text(tr.openSourceLicenses),
           onTap: () => showLicensePage(context: context, applicationName: 'LifeBox'),
         ),
       ]),

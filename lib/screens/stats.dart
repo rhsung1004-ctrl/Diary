@@ -4,6 +4,7 @@ import '../common.dart';
 import '../models.dart';
 import '../store.dart';
 import 'year_review.dart';
+import '../i18n.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -20,11 +21,11 @@ class _StatsScreenState extends State<StatsScreen> {
     final store = AppStore.instance;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('통계'),
+        title: Text(tr.stats),
         actions: [
           TextButton.icon(
             icon: const Icon(Icons.card_giftcard_outlined),
-            label: const Text('연말 결산'),
+            label: Text(tr.yearReview),
             onPressed: () =>
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const YearReviewScreen())),
           ),
@@ -44,28 +45,28 @@ class _StatsScreenState extends State<StatsScreen> {
               .length;
 
           return ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
-            const SectionTitle('일기'),
+            SectionTitle(tr.diary),
             Row(children: [
-              _Tile('연속 작성', '${diaryStreak(diaryDays.keys.toSet(), today)}일'),
+              _Tile(tr.streak, tr.countDays(diaryStreak(diaryDays.keys.toSet(), today))),
               const SizedBox(width: 8),
-              _Tile('이번 달', '$thisMonth편'),
+              _Tile(tr.thisMonth, tr.countEntries(thisMonth)),
               const SizedBox(width: 8),
-              _Tile('전체', '${store.diaries.length}편'),
+              _Tile(tr.all, tr.countEntries(store.diaries.length)),
             ]),
             const SizedBox(height: 12),
             _Card(
-              title: '최근 15주 기록',
+              title: tr.last15Weeks,
               child: _Heatmap(days: diaryDays, today: today),
             ),
             const SizedBox(height: 12),
             _Card(
-              title: '기분',
+              title: tr.mood,
               trailing: SegmentedButton<bool>(
                 showSelectedIcon: false,
                 style: const ButtonStyle(visualDensity: VisualDensity.compact),
-                segments: const [
-                  ButtonSegment(value: true, label: Text('30일')),
-                  ButtonSegment(value: false, label: Text('전체')),
+                segments: [
+                  ButtonSegment(value: true, label: Text(tr.days30)),
+                  ButtonSegment(value: false, label: Text(tr.all)),
                 ],
                 selected: {_moodRecent},
                 onSelectionChanged: (s) => setState(() => _moodRecent = s.first),
@@ -78,11 +79,11 @@ class _StatsScreenState extends State<StatsScreen> {
                     : store.diaries,
               ),
             ),
-            const SectionTitle('목표 · 버킷리스트'),
+            SectionTitle(tr.goalsAndBuckets),
             _GoalStats(goals: store.goals),
             const SizedBox(height: 12),
             _BucketStats(items: store.buckets, year: today.year),
-            const SectionTitle('커리어'),
+            SectionTitle(tr.tabCareer),
             _CareerStats(items: store.careers),
           ]);
         },
@@ -190,7 +191,7 @@ class _Heatmap extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(left: gap),
                     child: GestureDetector(
-                      onTap: future ? null : () => toast(context, '${fmtDateW(d)} · 일기 $n편'),
+                      onTap: future ? null : () => toast(context, tr.heatTap(fmtDateW(d), n)),
                       child: Container(
                         width: cell,
                         height: cell,
@@ -206,7 +207,7 @@ class _Heatmap extends StatelessWidget {
           ),
         const SizedBox(height: 6),
         Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Text('적음 ', style: TextStyle(fontSize: 10, color: c.onSurfaceVariant)),
+          Text('${tr.less} ', style: TextStyle(fontSize: 10, color: c.onSurfaceVariant)),
           for (final n in [0, 1, 2, 3])
             Container(
               width: 10,
@@ -214,7 +215,7 @@ class _Heatmap extends StatelessWidget {
               margin: const EdgeInsets.only(left: 2),
               decoration: BoxDecoration(color: cellColor(n), borderRadius: BorderRadius.circular(2)),
             ),
-          Text(' 많음', style: TextStyle(fontSize: 10, color: c.onSurfaceVariant)),
+          Text(' ${tr.more}', style: TextStyle(fontSize: 10, color: c.onSurfaceVariant)),
         ]),
       ]);
     });
@@ -273,7 +274,7 @@ class _MoodBars extends StatelessWidget {
       if (counts.containsKey(e.mood)) counts[e.mood] = counts[e.mood]! + 1;
     }
     final total = counts.values.fold(0, (a, b) => a + b);
-    if (total == 0) return const Text('기분을 고른 일기가 아직 없어요');
+    if (total == 0) return Text(tr.noMoodYet);
     final max = counts.values.reduce((a, b) => a > b ? a : b);
     return Column(children: [
       for (final m in moods)
@@ -297,22 +298,22 @@ class _GoalStats extends StatelessWidget {
     final active = goals.where((g) => !g.isComplete).toList();
     final avg = active.isEmpty ? 0.0 : active.map((g) => g.progress).reduce((a, b) => a + b) / active.length;
     return _Card(
-      title: '목표',
+      title: tr.goals,
       child: goals.isEmpty
-          ? const Text('아직 목표가 없어요')
+          ? Text(tr.noGoalsYet)
           : Column(children: [
               Row(children: [
-                _Tile('완료', '$done개'),
+                _Tile(tr.done, tr.countItems(done)),
                 const SizedBox(width: 8),
-                _Tile('진행 중', '${active.length}개'),
+                _Tile(tr.inProgress, tr.countItems(active.length)),
                 const SizedBox(width: 8),
-                _Tile('평균 진행률', '${(avg * 100).round()}%'),
+                _Tile(tr.avgProgress, '${(avg * 100).round()}%'),
               ]),
               const SizedBox(height: 12),
               for (final p in goalPeriods)
                 if (goals.any((g) => g.period == p))
                   _Bar(
-                    label: Text(p),
+                    label: Text(goalPeriodLabel(p)),
                     value: goals.where((g) => g.period == p && g.isComplete).length,
                     max: goals.where((g) => g.period == p).length,
                     valueText:
@@ -333,16 +334,16 @@ class _BucketStats extends StatelessWidget {
     final done = items.where((b) => b.done).toList();
     final thisYear = done.where((b) => b.doneAt?.year == year).length;
     return _Card(
-      title: '버킷리스트',
+      title: tr.bucketList,
       child: items.isEmpty
-          ? const Text('아직 버킷리스트가 없어요')
+          ? Text(tr.noBucketsYet)
           : Column(children: [
               Row(children: [
-                _Tile('달성률', '${(done.length * 100 / items.length).round()}%'),
+                _Tile(tr.achieveRate, '${(done.length * 100 / items.length).round()}%'),
                 const SizedBox(width: 8),
-                _Tile('$year년 달성', '$thisYear개'),
+                _Tile(tr.achievedInYear(year), tr.countItems(thisYear)),
                 const SizedBox(width: 8),
-                _Tile('남은 것', '${items.length - done.length}개'),
+                _Tile(tr.remaining, tr.countItems(items.length - done.length)),
               ]),
             ]),
     );
@@ -364,9 +365,9 @@ class _CareerStats extends StatelessWidget {
     final top = skillCount.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
     final shown = top.take(8).toList();
     return _Card(
-      title: '많이 쓴 기술 · 키워드',
+      title: tr.topSkills,
       child: shown.isEmpty
-          ? const Text('커리어 항목에 기술을 적으면 여기에 모여요')
+          ? Text(tr.noSkillsYet)
           : Column(children: [
               for (final e in shown)
                 _Bar(
@@ -378,7 +379,7 @@ class _CareerStats extends StatelessWidget {
               Wrap(spacing: 8, children: [
                 for (final t in careerTypes)
                   if (items.any((c) => c.type == t))
-                    Chip(label: Text('$t ${items.where((c) => c.type == t).length}')),
+                    Chip(label: Text('${careerTypeLabel(t)} ${items.where((c) => c.type == t).length}')),
               ]),
             ]),
     );

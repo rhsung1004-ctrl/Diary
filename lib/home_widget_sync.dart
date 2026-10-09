@@ -7,6 +7,7 @@ import 'package:home_widget/home_widget.dart';
 import 'common.dart';
 import 'prefs.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 /// 안드로이드 홈 화면 위젯에 보여줄 값을 넘겨줌.
 /// 날짜가 바뀐 경우(오늘 일기 여부, 연속 기록)는 위젯 쪽(Kotlin)에서 다시 판단함.
@@ -39,6 +40,14 @@ class HomeWidgetSync {
         'streak': diaryStreak(days, today).toString(),
         'hidden': AppPrefs.instance.lockEnabled.toString(), // 잠금 중엔 목표 제목 숨김
         'goal_count': goals.length.toString(),
+        // 위젯 문구도 앱 언어로 ({n}은 위젯이 채움)
+        'lang': appLang,
+        't_done': tr.wDone,
+        't_todo': tr.wTodo,
+        't_streak': tr.wStreak('{n}'),
+        't_write': tr.wWrite,
+        't_no_goals': tr.wNoGoals,
+        't_locked': tr.wLocked('{n}'),
       };
       for (var i = 0; i < 2; i++) {
         final g = i < goals.length ? goals[i] : null;

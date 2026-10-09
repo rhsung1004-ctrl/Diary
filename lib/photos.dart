@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'common.dart';
 import 'lock.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 /// 정사각형 썸네일
 class PhotoThumb extends StatelessWidget {
@@ -36,9 +37,9 @@ class PhotoThumb extends StatelessWidget {
 /// 편집 화면용: 사진 추가(갤러리 여러 장 / 카메라), 삭제
 class PhotoEditor extends StatefulWidget {
   final List<String> photos; // 이 리스트를 직접 수정함
-  final String label;
+  final String? label;
   final VoidCallback? onChanged;
-  const PhotoEditor({super.key, required this.photos, this.label = '사진', this.onChanged});
+  const PhotoEditor({super.key, required this.photos, this.label, this.onChanged});
 
   @override
   State<PhotoEditor> createState() => _PhotoEditorState();
@@ -65,7 +66,7 @@ class _PhotoEditorState extends State<PhotoEditor> {
       }
       widget.onChanged?.call();
     } catch (e) {
-      if (mounted) toast(context, '사진을 불러오지 못했어요: $e');
+      if (mounted) toast(context, tr.photoLoadFail(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -78,7 +79,7 @@ class _PhotoEditorState extends State<PhotoEditor> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           ListTile(
             leading: const Icon(Icons.photo_library_outlined),
-            title: const Text('갤러리에서 선택'),
+            title: Text(tr.pickGallery),
             onTap: () {
               Navigator.pop(ctx);
               _add(ImageSource.gallery);
@@ -86,7 +87,7 @@ class _PhotoEditorState extends State<PhotoEditor> {
           ),
           ListTile(
             leading: const Icon(Icons.photo_camera_outlined),
-            title: const Text('카메라로 찍기'),
+            title: Text(tr.pickCamera),
             onTap: () {
               Navigator.pop(ctx);
               _add(ImageSource.camera);
@@ -102,7 +103,7 @@ class _PhotoEditorState extends State<PhotoEditor> {
     final scheme = Theme.of(context).colorScheme;
     final photos = widget.photos;
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(widget.label, style: Theme.of(context).textTheme.titleSmall),
+      Text(widget.label ?? tr.photos, style: Theme.of(context).textTheme.titleSmall),
       const SizedBox(height: 8),
       SizedBox(
         height: 96,

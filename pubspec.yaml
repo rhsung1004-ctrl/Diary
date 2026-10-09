@@ -26,6 +26,7 @@ dependencies:
   timezone: any
   share_plus: ^13.3.1
   cross_file: any
+  intl: any
 
 dev_dependencies:
   flutter_test:
@@ -41,6 +42,7 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  generate: true
   assets:
     - assets/fonts/licenses/
   # 모두 SIL Open Font License 1.1 (assets/fonts/licenses 참고)
@@ -61,3 +63,24 @@ flutter:
     - family: NanumPenScript
       fonts:
         - asset: assets/fonts/NanumPenScript-Regular.ttf
+    # 영어
+    - family: Lora
+      fonts:
+        - asset: assets/fonts/Lora.ttf
+    - family: Caveat
+      fonts:
+        - asset: assets/fonts/Caveat.ttf
+    # 일본어
+    - family: ZenMaruGothic
+      fonts:
+        - asset: assets/fonts/ZenMaruGothic-Regular.ttf
+        - asset: assets/fonts/ZenMaruGothic-Bold.ttf
+          weight: 700
+    - family: ShipporiMincho
+      fonts:
+        - asset: assets/fonts/ShipporiMincho-Regular.ttf
+        - asset: assets/fonts/ShipporiMincho-Bold.ttf
+          weight: 700
+    - family: KleeOne
+      fonts:
+        - asset: assets/fonts/KleeOne-Regular.ttf

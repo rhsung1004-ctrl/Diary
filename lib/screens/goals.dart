@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../common.dart';
 import '../models.dart';
 import '../store.dart';
+import '../i18n.dart';
 
 class GoalScreen extends StatefulWidget {
   const GoalScreen({super.key});
@@ -18,7 +19,7 @@ class _GoalScreenState extends State<GoalScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('목표')),
+      appBar: AppBar(title: Text(tr.goals)),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_goal',
         onPressed: () => openGoalEditor(context, null),
@@ -34,8 +35,8 @@ class _GoalScreenState extends State<GoalScreen> {
             SegmentedButton<int>(
               showSelectedIcon: false,
               segments: [
-                ButtonSegment(value: 0, label: Text('진행 중 ${active.length}')),
-                ButtonSegment(value: 1, label: Text('완료 ${complete.length}')),
+                ButtonSegment(value: 0, label: Text(tr.goalsActiveCount(active.length))),
+                ButtonSegment(value: 1, label: Text(tr.goalsDoneCount(complete.length))),
               ],
               selected: {_filter},
               onSelectionChanged: (s) => setState(() => _filter = s.first),
@@ -44,19 +45,18 @@ class _GoalScreenState extends State<GoalScreen> {
 
           if (_filter == 0) {
             if (active.isEmpty) {
-              children.add(const EmptyState(
-                  icon: Icons.track_changes, text: '올해, 이번 달, 이번 주의\n목표를 세워 보세요'));
+              children.add(EmptyState(icon: Icons.track_changes, text: tr.goalsEmpty));
             }
             for (final p in goalPeriods) {
               final list = active.where((g) => g.period == p).toList()
                 ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
               if (list.isEmpty) continue;
-              children.add(SectionTitle(p));
+              children.add(SectionTitle(goalPeriodLabel(p)));
               children.addAll(list.map((g) => GoalCard(goal: g)));
             }
           } else {
             if (complete.isEmpty) {
-              children.add(const EmptyState(icon: Icons.emoji_events_outlined, text: '아직 완료한 목표가 없어요'));
+              children.add(EmptyState(icon: Icons.emoji_events_outlined, text: tr.goalsNoneDone));
             }
             children.addAll(complete.map((g) => GoalCard(goal: g)));
           }
@@ -113,8 +113,8 @@ class GoalCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               g.tasks.isEmpty
-                  ? (g.isComplete ? '달성 완료' : '할 일을 추가해 보세요')
-                  : '할 일 ${g.doneTasks}/${g.tasks.length} · ${(g.progress * 100).round()}%',
+                  ? (g.isComplete ? tr.goalAchieved : tr.goalAddTasksHint)
+                  : tr.goalTaskProgress(g.doneTasks, g.tasks.length, (g.progress * 100).round()),
               style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant),
             ),
           ]),
@@ -161,7 +161,7 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
 
   Future<void> _save() async {
     if (_title.text.trim().isEmpty) {
-      toast(context, '목표를 입력해 주세요');
+      toast(context, tr.goalEnterTitle);
       return;
     }
     _addTask(); // 입력창에 남은 할 일도 같이 저장
@@ -174,7 +174,7 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
   }
 
   Future<void> _delete() async {
-    if (!await confirmDialog(context, '삭제할까요?', '"${d.title}" 목표를 삭제해요.', '삭제')) return;
+    if (!await confirmDialog(context, tr.deleteConfirmTitle, tr.goalDeleteBody(d.title), tr.delete)) return;
     await AppStore.instance.removeGoal(d.id);
     dirty = false;
     if (mounted) Navigator.pop(context);
@@ -185,26 +185,26 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
     final t = Theme.of(context);
     return guard(Scaffold(
       appBar: AppBar(
-        title: Text(isNew ? '새 목표' : '목표'),
+        title: Text(isNew ? tr.goalNew : tr.goals),
         actions: [
           if (!isNew) IconButton(icon: const Icon(Icons.delete_outline), onPressed: _delete),
-          TextButton(onPressed: _save, child: const Text('저장')),
+          TextButton(onPressed: _save, child: Text(tr.save)),
         ],
       ),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         TextField(
           controller: _title,
           autofocus: isNew,
-          decoration: deco('목표', hint: '예) JLPT N1 합격'),
+          decoration: deco(tr.goals, hint: tr.goalTitleHint),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 16),
-        Text('기간', style: t.textTheme.titleSmall),
+        Text(tr.goalPeriod, style: t.textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(spacing: 8, children: [
           for (final p in goalPeriods)
             ChoiceChip(
-              label: Text(p),
+              label: Text(goalPeriodLabel(p)),
               selected: d.period == p,
               onSelected: (_) {
                 setState(() => d.period = p);
@@ -213,7 +213,7 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
             ),
         ]),
         DateTile(
-          label: '마감일 (선택)',
+          label: tr.goalDue,
           value: d.dueDate,
           onPick: (v) {
             setState(() => d.dueDate = v);
@@ -226,7 +226,7 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
         ),
         const SizedBox(height: 8),
         Row(children: [
-          Text('할 일', style: t.textTheme.titleSmall),
+          Text(tr.goalTasks, style: t.textTheme.titleSmall),
           const Spacer(),
           if (d.tasks.isNotEmpty)
             Text('${d.doneTasks}/${d.tasks.length}', style: t.textTheme.bodySmall),
@@ -259,7 +259,7 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
           Expanded(
             child: TextField(
               controller: _task,
-              decoration: const InputDecoration(hintText: '할 일 추가', isDense: true),
+              decoration: InputDecoration(hintText: tr.goalAddTask, isDense: true),
               textInputAction: TextInputAction.done,
               onSubmitted: (_) => _addTask(),
             ),
@@ -271,14 +271,14 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
           controller: _note,
           minLines: 3,
           maxLines: 8,
-          decoration: deco('메모 (선택)', hint: '왜 이루고 싶은지, 회고…'),
+          decoration: deco(tr.optional(tr.memo), hint: tr.goalMemoHint),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 8),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('목표 달성으로 표시'),
-          subtitle: const Text('할 일과 상관없이 완료로 옮겨요'),
+          title: Text(tr.goalMarkDone),
+          subtitle: Text(tr.goalMarkDoneSub),
           value: d.done,
           onChanged: (v) {
             setState(() => d.done = v);

@@ -7,13 +7,14 @@ import 'package:pdf/widgets.dart' as pw;
 import 'common.dart';
 import 'models.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 /// 포트폴리오 PDF 순서
 const portfolioOrder = ['경력', '프로젝트', '학력', '자격·수상', '활동'];
 
 String _period(CareerItem c) {
   if (c.startDate == null) return '';
-  final end = c.ongoing ? '현재' : (c.endDate == null ? '' : fmtMonth(c.endDate!));
+  final end = c.ongoing ? tr.present : (c.endDate == null ? '' : fmtMonth(c.endDate!));
   return end.isEmpty ? fmtMonth(c.startDate!) : '${fmtMonth(c.startDate!)} – $end';
 }
 
@@ -24,8 +25,15 @@ Future<Uint8List> buildPortfolioPdf({
   required bool includeImages,
   required int accentArgb,
 }) async {
-  final regular = pw.Font.ttf(await rootBundle.load('assets/fonts/Pretendard-Regular.ttf'));
-  final bold = pw.Font.ttf(await rootBundle.load('assets/fonts/Pretendard-Bold.ttf'));
+  // 한글·영문은 프리텐다드, 일본어 화면이면 Zen 마루 고딕을 기본으로 (서로 대체 글꼴)
+  final kr = pw.Font.ttf(await rootBundle.load('assets/fonts/Pretendard-Regular.ttf'));
+  final krBold = pw.Font.ttf(await rootBundle.load('assets/fonts/Pretendard-Bold.ttf'));
+  final jp = pw.Font.ttf(await rootBundle.load('assets/fonts/ZenMaruGothic-Regular.ttf'));
+  final jpBold = pw.Font.ttf(await rootBundle.load('assets/fonts/ZenMaruGothic-Bold.ttf'));
+  final isJa = appLang == 'ja';
+  final regular = isJa ? jp : kr;
+  final bold = isJa ? jpBold : krBold;
+  final fallback = isJa ? [kr, krBold] : [jp, jpBold];
   final accent = PdfColor.fromInt(accentArgb);
   const muted = PdfColors.grey700;
   final store = AppStore.instance;
@@ -37,8 +45,8 @@ Future<Uint8List> buildPortfolioPdf({
   }
 
   final doc = pw.Document(
-    theme: pw.ThemeData.withFont(base: regular, bold: bold),
-    title: profile.name.isEmpty ? '포트폴리오' : '${profile.name} 포트폴리오',
+    theme: pw.ThemeData.withFont(base: regular, bold: bold, fontFallback: fallback),
+    title: profile.name.isEmpty ? tr.portfolio : tr.portfolioOf(profile.name),
     author: profile.name,
   );
 
@@ -58,7 +66,7 @@ Future<Uint8List> buildPortfolioPdf({
     ],
     pw.Expanded(
       child: pw.Column(crossAxisAlignment: pw.CrossAxisAlignment.start, children: [
-        pw.Text(profile.name.isEmpty ? '포트폴리오' : profile.name,
+        pw.Text(profile.name.isEmpty ? tr.portfolio : profile.name,
             style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
         if (profile.headline.isNotEmpty) ...[
           pw.SizedBox(height: 4),
@@ -94,7 +102,7 @@ Future<Uint8List> buildPortfolioPdf({
     body.add(pw.Row(children: [
       pw.Container(width: 4, height: 14, color: accent),
       pw.SizedBox(width: 8),
-      pw.Text(type, style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+      pw.Text(careerTypeLabel(type), style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
     ]));
     body.add(pw.SizedBox(height: 8));
 

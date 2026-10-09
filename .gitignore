@@ -6,3 +6,5 @@ build/
 *.iml
 android/.gradle/
 android/local.properties
+lib/l10n/app_localizations*.dart
+analyze.txt

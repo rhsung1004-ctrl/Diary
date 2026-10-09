@@ -6,6 +6,7 @@ import '../photos.dart';
 import '../store.dart';
 import 'diary_calendar.dart';
 import 'diary_prompts.dart';
+import '../i18n.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -22,10 +23,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
     final store = AppStore.instance;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('일기'),
+        title: Text(tr.diary),
         actions: [
           IconButton(
-            tooltip: _calendar ? '목록으로 보기' : '달력으로 보기',
+            tooltip: _calendar ? tr.viewList : tr.viewCalendar,
             icon: Icon(_calendar ? Icons.view_agenda_outlined : Icons.calendar_month_outlined),
             onPressed: () => setState(() => _calendar = !_calendar),
           ),
@@ -35,7 +36,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         heroTag: 'fab_diary',
         onPressed: () => openDiaryEditor(context, null),
         icon: const Icon(Icons.edit_outlined),
-        label: const Text('오늘 일기'),
+        label: Text(tr.todayDiary),
       ),
       body: _calendar
           ? const DiaryCalendar()
@@ -48,18 +49,17 @@ class _DiaryScreenState extends State<DiaryScreen> {
               return c != 0 ? c : b.createdAt.compareTo(a.createdAt);
             });
           if (list.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.only(bottom: 80), // 하단 버튼만큼 살짝 위로
-                child: EmptyState(
-                    icon: Icons.menu_book_outlined, text: '첫 일기를 써 보세요\n사진도 함께 남길 수 있어요', top: 0),
+                padding: const EdgeInsets.only(bottom: 80), // 하단 버튼만큼 살짝 위로
+                child: EmptyState(icon: Icons.menu_book_outlined, text: tr.diaryEmpty, top: 0),
               ),
             );
           }
           final children = <Widget>[];
           String? month;
           for (final e in list) {
-            final m = '${e.date.year}년 ${e.date.month}월';
+            final m = fmtMonthTitle(e.date);
             if (m != month) {
               month = m;
               children.add(SectionTitle(m));
@@ -103,7 +103,7 @@ class DiaryCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(headline.isEmpty ? '(사진 일기)' : headline,
+                Text(headline.isEmpty ? tr.photoDiary : headline,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: t.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
@@ -214,7 +214,7 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
       ..title = _title.text.trim()
       ..body = _body.text.trimRight();
     if (d.title.isEmpty && d.body.trim().isEmpty && d.photos.isEmpty) {
-      toast(context, '내용이나 사진을 넣어 주세요');
+      toast(context, tr.diaryNeedContent);
       return;
     }
     await AppStore.instance.upsertDiary(d);
@@ -223,7 +223,7 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
   }
 
   Future<void> _delete() async {
-    if (!await confirmDialog(context, '일기를 삭제할까요?', '삭제하면 되돌릴 수 없어요.', '삭제')) return;
+    if (!await confirmDialog(context, tr.diaryDeleteTitle, tr.cannotUndo, tr.delete)) return;
     await AppStore.instance.removeDiary(d.id);
     dirty = false;
     if (mounted) Navigator.pop(context, true);
@@ -233,15 +233,15 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
   Widget build(BuildContext context) {
     return guard(Scaffold(
       appBar: AppBar(
-        title: Text(isNew ? '일기 쓰기' : '일기 수정'),
+        title: Text(isNew ? tr.writeDiary : tr.diaryEdit),
         actions: [
           if (!isNew) IconButton(icon: const Icon(Icons.delete_outline), onPressed: _delete),
-          TextButton(onPressed: _save, child: const Text('저장')),
+          TextButton(onPressed: _save, child: Text(tr.save)),
         ],
       ),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         DateTile(
-          label: '날짜',
+          label: tr.date,
           value: d.date,
           onPick: (v) {
             setState(() => d.date = v);
@@ -249,7 +249,7 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
           },
         ),
         const SizedBox(height: 4),
-        Text('오늘의 기분', style: Theme.of(context).textTheme.titleSmall),
+        Text(tr.todayMood, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(spacing: 4, runSpacing: 4, children: [
           for (final m in moods)
@@ -266,7 +266,7 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
         const SizedBox(height: 16),
         TextField(
           controller: _title,
-          decoration: deco('제목 (선택)'),
+          decoration: deco(tr.optional(tr.title)),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 12),
@@ -274,7 +274,7 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
           alignment: Alignment.centerLeft,
           child: TextButton.icon(
             icon: const Icon(Icons.lightbulb_outline, size: 18),
-            label: const Text('질문으로 쓰기'),
+            label: Text(tr.askPrompt),
             onPressed: () async {
               final text = await pickDiaryPrompt(context);
               if (text == null) return;
@@ -291,7 +291,7 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
           minLines: 10,
           maxLines: null,
           keyboardType: TextInputType.multiline,
-          decoration: deco('오늘 있었던 일', hint: '자유롭게 적어 보세요'),
+          decoration: deco(tr.diaryBody, hint: tr.diaryBodyHint),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 16),

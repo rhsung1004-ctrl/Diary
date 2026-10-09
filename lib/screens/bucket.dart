@@ -5,6 +5,7 @@ import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
 import 'diary.dart';
+import '../i18n.dart';
 
 class BucketScreen extends StatefulWidget {
   const BucketScreen({super.key});
@@ -20,7 +21,7 @@ class _BucketScreenState extends State<BucketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('버킷리스트')),
+      appBar: AppBar(title: Text(tr.bucketList)),
       floatingActionButton: FloatingActionButton(
         heroTag: 'fab_bucket',
         onPressed: () => openBucketEditor(context, null),
@@ -42,17 +43,17 @@ class _BucketScreenState extends State<BucketScreen> {
               const SizedBox(height: 12),
               SegmentedButton<int>(
                 showSelectedIcon: false,
-                segments: const [
-                  ButtonSegment(value: 0, label: Text('전체')),
-                  ButtonSegment(value: 1, label: Text('도전 중')),
-                  ButtonSegment(value: 2, label: Text('달성')),
+                segments: [
+                  ButtonSegment(value: 0, label: Text(tr.all)),
+                  ButtonSegment(value: 1, label: Text(tr.bucketTrying)),
+                  ButtonSegment(value: 2, label: Text(tr.bucketAchieved)),
                 ],
                 selected: {_filter},
                 onSelectionChanged: (s) => setState(() => _filter = s.first),
               ),
               const SizedBox(height: 8),
               if (items.isEmpty)
-                const EmptyState(icon: Icons.flag_outlined, text: '살면서 꼭 해보고 싶은 일을\n추가해 보세요'),
+                EmptyState(icon: Icons.flag_outlined, text: tr.bucketEmpty),
               for (final b in items) BucketTile(item: b),
             ],
           );
@@ -76,7 +77,7 @@ class _ProgressHeader extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('$total개 중 $done개 달성',
+          Text(tr.bucketProgress(total, done),
               style: t.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold, color: t.colorScheme.onPrimaryContainer)),
           const SizedBox(height: 10),
@@ -100,7 +101,7 @@ class BucketTile extends StatelessWidget {
     final b = item;
     final sub = [
       if (b.category.isNotEmpty) b.category,
-      if (b.done && b.doneAt != null) '${fmtDate(b.doneAt!)} 달성',
+      if (b.done && b.doneAt != null) tr.bucketDoneOn(fmtDate(b.doneAt!)),
     ].join(' · ');
     return Card(
       child: ListTile(
@@ -156,7 +157,7 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
 
   Future<void> _save() async {
     if (_title.text.trim().isEmpty) {
-      toast(context, '제목을 입력해 주세요');
+      toast(context, tr.enterTitle);
       return;
     }
     d
@@ -177,7 +178,7 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
   }
 
   Future<void> _delete() async {
-    if (!await confirmDialog(context, '삭제할까요?', '"${d.title}"을(를) 삭제해요.', '삭제')) return;
+    if (!await confirmDialog(context, tr.deleteConfirmTitle, tr.deleteItemBody(d.title), tr.delete)) return;
     await AppStore.instance.removeBucket(d.id);
     dirty = false;
     if (mounted) Navigator.pop(context);
@@ -187,23 +188,23 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
   Widget build(BuildContext context) {
     return guard(Scaffold(
       appBar: AppBar(
-        title: Text(isNew ? '새 버킷리스트' : '버킷리스트 수정'),
+        title: Text(isNew ? tr.bucketNew : tr.bucketEdit),
         actions: [
           if (!isNew) IconButton(icon: const Icon(Icons.delete_outline), onPressed: _delete),
-          TextButton(onPressed: _save, child: const Text('저장')),
+          TextButton(onPressed: _save, child: Text(tr.save)),
         ],
       ),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         TextField(
           controller: _title,
           autofocus: isNew,
-          decoration: deco('하고 싶은 일', hint: '예) 오로라 보러 가기'),
+          decoration: deco(tr.bucketWhat, hint: tr.bucketWhatHint),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _category,
-          decoration: deco('분류 (선택)', hint: '여행, 도전, 배움, 경험…'),
+          decoration: deco(tr.optional(tr.category), hint: tr.bucketCategoryHint),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 12),
@@ -211,13 +212,13 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
           controller: _note,
           minLines: 3,
           maxLines: 8,
-          decoration: deco('메모 (선택)', hint: '왜 하고 싶은지, 계획, 달성 소감…'),
+          decoration: deco(tr.optional(tr.memo), hint: tr.bucketMemoHint),
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 8),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('달성했어요'),
+          title: Text(tr.bucketDoneSwitch),
           value: d.done,
           onChanged: (v) {
             setState(() {
@@ -229,7 +230,7 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
         ),
         if (d.done)
           DateTile(
-            label: '달성한 날',
+            label: tr.bucketDoneDate,
             value: d.doneAt,
             onPick: (v) {
               setState(() => d.doneAt = v);
@@ -237,7 +238,7 @@ class _BucketEditorState extends State<BucketEditor> with DirtyGuard<BucketEdito
             },
           ),
         const SizedBox(height: 12),
-        PhotoEditor(photos: d.photos, label: '사진 (인증샷, 참고 이미지)', onChanged: markDirty),
+        PhotoEditor(photos: d.photos, label: tr.bucketPhotos, onChanged: markDirty),
       ]),
     ));
   }
@@ -256,21 +257,21 @@ Future<bool> askBucketDiary(BuildContext context, BucketItem b) async {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Text('🎉', style: TextStyle(fontSize: 48)),
             const SizedBox(height: 8),
-            Text('"${b.title}" 달성!',
+            Text(tr.bucketCongrats(b.title),
                 textAlign: TextAlign.center,
                 style: t.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Text(
-              b.photos.isEmpty ? '이 순간을 일기로 남겨 둘까요?' : '이 순간을 일기로 남겨 둘까요?\n버킷에 넣은 사진도 함께 담아 드려요.',
+              b.photos.isEmpty ? tr.bucketAskDiary : tr.bucketAskDiaryPhotos,
               textAlign: TextAlign.center,
               style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
-              child: FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('일기 쓰기')),
+              child: FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr.writeDiary)),
             ),
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('나중에')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr.later)),
           ]),
         ),
       );
@@ -281,7 +282,7 @@ Future<bool> askBucketDiary(BuildContext context, BucketItem b) async {
 
 DiaryEntry bucketDiaryDraft(BucketItem b) => DiaryEntry(
       date: b.doneAt ?? DateTime.now(),
-      title: '🎉 ${b.title} 달성',
+      title: tr.bucketDiaryTitle(b.title),
       mood: '😆',
       photos: List.of(b.photos),
     );

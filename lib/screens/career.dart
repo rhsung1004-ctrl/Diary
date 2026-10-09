@@ -6,10 +6,11 @@ import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
 import 'portfolio.dart';
+import '../i18n.dart';
 
 String careerPeriod(CareerItem c) {
   if (c.startDate == null) return '';
-  final end = c.ongoing ? '현재' : (c.endDate == null ? '' : fmtMonth(c.endDate!));
+  final end = c.ongoing ? tr.present : (c.endDate == null ? '' : fmtMonth(c.endDate!));
   return end.isEmpty ? fmtMonth(c.startDate!) : '${fmtMonth(c.startDate!)} ~ $end';
 }
 
@@ -28,16 +29,16 @@ class _CareerScreenState extends State<CareerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('커리어 · 포트폴리오'),
+        title: Text(tr.careerTitle),
         actions: [
           IconButton(
-            tooltip: '내 프로필',
+            tooltip: tr.myProfile,
             icon: const Icon(Icons.badge_outlined),
             onPressed: () =>
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileEditor())),
           ),
           IconButton(
-            tooltip: 'PDF로 내보내기',
+            tooltip: tr.exportPdf,
             icon: const Icon(Icons.picture_as_pdf_outlined),
             onPressed: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const PortfolioExportScreen())),
@@ -66,7 +67,7 @@ class _CareerScreenState extends State<CareerScreen> {
                   Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-                      label: Text(t ?? '전체'),
+                      label: Text(t == null ? tr.all : careerTypeLabel(t)),
                       selected: _type == t,
                       onSelected: (_) => setState(() => _type = t),
                     ),
@@ -75,7 +76,7 @@ class _CareerScreenState extends State<CareerScreen> {
             ),
             const SizedBox(height: 8),
             if (list.isEmpty)
-              const EmptyState(icon: Icons.work_outline, text: '프로젝트, 경력, 자격증을 정리해\n나만의 포트폴리오를 만들어 보세요'),
+              EmptyState(icon: Icons.work_outline, text: tr.careerEmpty),
             for (final c in list) CareerCard(item: c),
           ]);
         },
@@ -143,7 +144,7 @@ class _TypeBadge extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration:
           BoxDecoration(color: s.tertiaryContainer, borderRadius: BorderRadius.circular(6)),
-      child: Text(type,
+      child: Text(careerTypeLabel(type),
           style: Theme.of(context)
               .textTheme
               .labelMedium
@@ -211,18 +212,18 @@ class CareerView extends StatelessWidget {
             if (c.description.isNotEmpty)
               SelectableText(c.description, style: t.textTheme.bodyLarge?.copyWith(height: 1.6)),
             if (c.skills.isNotEmpty) ...[
-              const SectionTitle('기술 · 키워드'),
+              SectionTitle(tr.skillsKeywords),
               _Skills(c.skills),
             ],
             if (c.link.isNotEmpty) ...[
-              const SectionTitle('링크'),
+              SectionTitle(tr.link),
               Row(children: [
                 Expanded(child: SelectableText(c.link, style: TextStyle(color: t.colorScheme.primary))),
                 IconButton(
                   icon: const Icon(Icons.copy, size: 20),
                   onPressed: () {
                     Clipboard.setData(ClipboardData(text: c.link));
-                    toast(context, '링크를 복사했어요');
+                    toast(context, tr.linkCopied);
                   },
                 ),
               ]),
@@ -267,7 +268,7 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
 
   Future<void> _save() async {
     if (_title.text.trim().isEmpty) {
-      toast(context, '이름을 입력해 주세요');
+      toast(context, tr.enterName);
       return;
     }
     d
@@ -286,7 +287,7 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
   }
 
   Future<void> _delete() async {
-    if (!await confirmDialog(context, '삭제할까요?', '"${d.title}"을(를) 삭제해요.', '삭제')) return;
+    if (!await confirmDialog(context, tr.deleteConfirmTitle, tr.deleteItemBody(d.title), tr.delete)) return;
     await AppStore.instance.removeCareer(d.id);
     dirty = false;
     if (mounted) Navigator.pop(context, true);
@@ -310,17 +311,17 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
   Widget build(BuildContext context) {
     return guard(Scaffold(
       appBar: AppBar(
-        title: Text(isNew ? '새 항목' : '항목 수정'),
+        title: Text(isNew ? tr.careerNew : tr.careerEdit),
         actions: [
           if (!isNew) IconButton(icon: const Icon(Icons.delete_outline), onPressed: _delete),
-          TextButton(onPressed: _save, child: const Text('저장')),
+          TextButton(onPressed: _save, child: Text(tr.save)),
         ],
       ),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         Wrap(spacing: 8, runSpacing: 4, children: [
           for (final t in careerTypes)
             ChoiceChip(
-              label: Text(t),
+              label: Text(careerTypeLabel(t)),
               selected: d.type == t,
               onSelected: (_) {
                 setState(() => d.type = t);
@@ -329,10 +330,10 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
             ),
         ]),
         const SizedBox(height: 16),
-        _field(_title, '이름', hint: '예) 개인 일정 관리 앱 개발'),
-        _field(_org, '소속 · 역할 (선택)', hint: '예) 개인 프로젝트 / 개발 전담'),
+        _field(_title, tr.name, hint: tr.careerNameHint),
+        _field(_org, tr.optional(tr.careerOrg), hint: tr.careerOrgHint),
         DateTile(
-          label: '시작',
+          label: tr.start,
           value: d.startDate,
           onPick: (v) {
             setState(() => d.startDate = v);
@@ -345,7 +346,7 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('진행 중'),
+          title: Text(tr.inProgress),
           value: d.ongoing,
           onChanged: (v) {
             setState(() => d.ongoing = v);
@@ -354,7 +355,7 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
         ),
         if (!d.ongoing)
           DateTile(
-            label: '종료',
+            label: tr.end,
             value: d.endDate,
             onPick: (v) {
               setState(() => d.endDate = v);
@@ -366,10 +367,10 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
             },
           ),
         const SizedBox(height: 12),
-        _field(_desc, '설명', hint: '무엇을, 왜, 어떻게 했고 결과는 어땠는지', minLines: 5, maxLines: null),
-        _field(_skills, '기술 · 키워드 (쉼표로 구분)', hint: 'Flutter, Python, 영상편집'),
-        _field(_link, '링크 (선택)', hint: 'GitHub, 블로그, 시연 영상 주소', type: TextInputType.url),
-        PhotoEditor(photos: d.photos, label: '이미지 (스크린샷, 결과물, 증명서)', onChanged: markDirty),
+        _field(_desc, tr.description, hint: tr.careerDescHint, minLines: 5, maxLines: null),
+        _field(_skills, tr.careerSkillsField, hint: tr.careerSkillsHint),
+        _field(_link, tr.optional(tr.link), hint: tr.careerLinkHint, type: TextInputType.url),
+        PhotoEditor(photos: d.photos, label: tr.careerImages, onChanged: markDirty),
         const SizedBox(height: 24),
       ]),
     ));

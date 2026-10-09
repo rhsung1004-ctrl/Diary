@@ -9,6 +9,7 @@ import 'settings.dart';
 import 'search.dart';
 import 'stats.dart';
 import 'year_review.dart';
+import '../i18n.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
@@ -20,23 +21,23 @@ class HomeScreen extends StatelessWidget {
     final t = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('LifeBox'),
+        title: Text(tr.appName),
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            tooltip: '검색',
+            tooltip: tr.search,
             onPressed: () =>
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
           ),
           IconButton(
             icon: const Icon(Icons.insights_outlined),
-            tooltip: '통계',
+            tooltip: tr.stats,
             onPressed: () =>
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsScreen())),
           ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
-            tooltip: '설정',
+            tooltip: tr.settings,
             onPressed: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
           ),
@@ -71,24 +72,24 @@ class HomeScreen extends StatelessWidget {
               mainAxisSpacing: 10,
               crossAxisSpacing: 10,
               children: [
-                _StatCard(Icons.flag_outlined, '버킷리스트', '$bucketDone / ${store.buckets.length}',
+                _StatCard(Icons.flag_outlined, tr.bucketList, '$bucketDone / ${store.buckets.length}',
                     () => onNavigate(1)),
-                _StatCard(Icons.track_changes, '진행 중 목표', '${activeGoals.length}개',
+                _StatCard(Icons.track_changes, tr.activeGoals, tr.countItems(activeGoals.length),
                     () => onNavigate(2)),
-                _StatCard(Icons.menu_book_outlined, '일기', '${store.diaries.length}편',
+                _StatCard(Icons.menu_book_outlined, tr.diary, tr.countEntries(store.diaries.length),
                     () => onNavigate(3)),
-                _StatCard(Icons.work_outline, '커리어', '${store.careers.length}개',
+                _StatCard(Icons.work_outline, tr.tabCareer, tr.countItems(store.careers.length),
                     () => onNavigate(4)),
               ],
             ),
-            const SectionTitle('오늘의 일기'),
+            SectionTitle(tr.todaysDiary),
             if (todayDiaries.isEmpty)
               Card(
                 elevation: 0,
                 color: t.colorScheme.secondaryContainer,
                 child: ListTile(
                   leading: const Icon(Icons.edit_outlined),
-                  title: const Text('아직 오늘 일기를 안 썼어요'),
+                  title: Text(tr.notWrittenToday),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => openDiaryEditor(context, null),
                 ),
@@ -96,11 +97,11 @@ class HomeScreen extends StatelessWidget {
             else
               ...todayDiaries.map((e) => DiaryCard(entry: e)),
             if (pastToday.isNotEmpty) ...[
-              const SectionTitle('📅 지난 오늘'),
+              SectionTitle(tr.pastToday),
               for (final e in pastToday) ...[
                 Padding(
                   padding: const EdgeInsets.only(left: 4, bottom: 2),
-                  child: Text('${now.year - e.date.year}년 전 오늘',
+                  child: Text(tr.yearsAgoToday(now.year - e.date.year),
                       style: t.textTheme.labelMedium?.copyWith(color: t.colorScheme.primary)),
                 ),
                 DiaryCard(entry: e),
@@ -113,21 +114,21 @@ class HomeScreen extends StatelessWidget {
                 color: t.colorScheme.tertiaryContainer,
                 child: ListTile(
                   leading: const Text('🎁', style: TextStyle(fontSize: 28)),
-                  title: Text('$reviewYear년 결산 카드'),
-                  subtitle: const Text('한 해 기록을 카드 한 장으로 돌아보세요'),
+                  title: Text(tr.yearReviewCard(reviewYear)),
+                  subtitle: Text(tr.yearReviewCardSub),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => YearReviewScreen(initialYear: reviewYear))),
                 ),
               ),
             ],
-            SectionTitle('진행 중인 목표', onMore: activeGoals.isEmpty ? null : () => onNavigate(2)),
+            SectionTitle(tr.goalsInProgress, onMore: activeGoals.isEmpty ? null : () => onNavigate(2)),
             if (activeGoals.isEmpty)
-              _Hint('목표를 세우면 여기에서 진행률을 볼 수 있어요', () => openGoalEditor(context, null))
+              _Hint(tr.goalsHomeHint, () => openGoalEditor(context, null))
             else
               ...activeGoals.take(3).map((g) => GoalCard(goal: g)),
             if (recentDone.isNotEmpty) ...[
-              SectionTitle('최근 달성한 버킷리스트', onMore: () => onNavigate(1)),
+              SectionTitle(tr.recentBuckets, onMore: () => onNavigate(1)),
               ...recentDone.take(3).map((b) => BucketTile(item: b)),
             ],
           ]);

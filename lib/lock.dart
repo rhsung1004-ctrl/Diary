@@ -10,6 +10,7 @@ import 'package:local_auth/local_auth.dart';
 import 'backup.dart';
 import 'common.dart';
 import 'prefs.dart';
+import 'i18n.dart';
 
 /// 앱 잠금 상태 관리
 class AppLock extends ChangeNotifier {
@@ -102,7 +103,7 @@ class AppLock extends ChangeNotifier {
   Future<bool> authenticateBiometric() async {
     try {
       return await runExternal(() => _auth.authenticate(
-            localizedReason: 'LifeBox 잠금 해제',
+            localizedReason: tr.lockReason,
             biometricOnly: true,
           ));
     } catch (e) {
@@ -160,7 +161,7 @@ class _LockScreenState extends State<_LockScreen> {
   void _digit(String d) {
     final until = _blockedUntil;
     if (until != null && DateTime.now().isBefore(until)) {
-      setState(() => _error = '${until.difference(DateTime.now()).inSeconds + 1}초 뒤에 다시 시도해 주세요');
+      setState(() => _error = tr.lockRetryIn(until.difference(DateTime.now()).inSeconds + 1));
       return;
     }
     if (_pin.length >= 4) return;
@@ -179,9 +180,9 @@ class _LockScreenState extends State<_LockScreen> {
           if (_fails >= 5) {
             _blockedUntil = DateTime.now().add(const Duration(seconds: 30));
             _fails = 0;
-            _error = '5번 틀려서 30초 동안 잠겨요';
+            _error = tr.lockTooMany;
           } else {
-            _error = 'PIN이 맞지 않아요';
+            _error = tr.lockWrong;
           }
         });
       }
@@ -194,23 +195,21 @@ class _LockScreenState extends State<_LockScreen> {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('PIN을 잊으셨나요?'),
-          content: const Text('잠금을 켤 때 구글 계정이 연결되어 있지 않아 이 화면에서 풀 수 없어요.\n\n'
-              '앱을 지우고 다시 설치한 뒤, 구글 드라이브 백업이 있다면 설정에서 복원할 수 있어요.'),
-          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('확인'))],
+          title: Text(tr.lockForgotTitle),
+          content: Text(tr.lockForgotNoAccount),
+          actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: Text(tr.ok))],
         ),
       );
       return;
     }
-    final ok = await confirmDialog(context, '구글 계정으로 잠금 해제',
-        '$email 계정으로 로그인하면 잠금이 풀리고 PIN이 초기화돼요.', '로그인');
+    final ok = await confirmDialog(context, tr.lockGoogleTitle, tr.lockGoogleBody(email), tr.signIn);
     if (!ok || !mounted) return;
     try {
       final got = await lock.runExternal(BackupService.instance.verifyGoogleAccount);
       if (got != null && got.toLowerCase() == email.toLowerCase()) {
         await lock.disable();
       } else if (mounted) {
-        toast(context, '잠금을 설정한 계정($email)으로 로그인해 주세요');
+        toast(context, tr.lockWrongAccount(email));
       }
     } catch (e) {
       if (mounted) toast(context, backupErrorText(e));
@@ -226,7 +225,7 @@ class _LockScreenState extends State<_LockScreen> {
           const Spacer(flex: 2),
           Icon(Icons.lock_outline, size: 40, color: t.colorScheme.primary),
           const SizedBox(height: 16),
-          Text('PIN을 입력해 주세요', style: t.textTheme.titleMedium),
+          Text(tr.lockEnterPin, style: t.textTheme.titleMedium),
           const SizedBox(height: 24),
           PinDots(length: _pin.length),
           SizedBox(
@@ -247,7 +246,7 @@ class _LockScreenState extends State<_LockScreen> {
                   )
                 : null,
           ),
-          TextButton(onPressed: _forgot, child: const Text('PIN을 잊었어요')),
+          TextButton(onPressed: _forgot, child: Text(tr.lockForgot)),
           const SizedBox(height: 16),
         ]),
       ),
@@ -348,7 +347,7 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
       setState(() {
         _first = null;
         _pin = '';
-        _error = '두 PIN이 달라요. 처음부터 다시 입력해 주세요';
+        _error = tr.pinMismatch;
       });
     }
   }
@@ -357,11 +356,11 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('PIN 설정')),
+      appBar: AppBar(title: Text(tr.pinSetup)),
       body: SafeArea(
         child: Column(children: [
           const Spacer(),
-          Text(_first == null ? '새 PIN 4자리를 입력해 주세요' : '한 번 더 입력해 주세요',
+          Text(_first == null ? tr.pinNew : tr.pinAgain,
               style: t.textTheme.titleMedium),
           const SizedBox(height: 24),
           PinDots(length: _pin.length),

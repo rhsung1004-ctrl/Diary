@@ -17,11 +17,15 @@ import 'screens/goals.dart';
 import 'screens/home.dart';
 import 'store.dart';
 import 'theme.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+import 'i18n.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppStore.instance.load();
   await AppPrefs.instance.load();
+  await initializeDateFormatting();
   AppLock.instance.lockOnStart();
   registerFontLicenses();
   HomeWidgetSync.start();
@@ -40,14 +44,17 @@ class LifeBoxApp extends StatelessWidget {
     return ListenableBuilder(
       listenable: prefs,
       builder: (context, _) => MaterialApp(
+        // 언어가 바뀌면 화면 전체를 새로 그림
+        key: ValueKey(appLang),
         title: 'LifeBox',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(colorIndex: prefs.colorIndex, brightness: Brightness.light, font: prefs.font),
         darkTheme: buildTheme(colorIndex: prefs.colorIndex, brightness: Brightness.dark, font: prefs.font),
         themeMode: prefs.themeMode,
-        locale: const Locale('ko'),
-        supportedLocales: const [Locale('ko'), Locale('en')],
+        locale: Locale(appLang),
+        supportedLocales: const [Locale('ko'), Locale('en'), Locale('ja')],
         localizationsDelegates: const [
+          AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
@@ -126,6 +133,9 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
   }
 
   @override
+  void didChangeLocales(List<Locale>? locales) => AppPrefs.instance.refresh();
+
+  @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     AppLock.instance.onLifecycle(state);
     // 앱을 나갈 때 자동 백업
@@ -149,12 +159,12 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: '홈'),
-          NavigationDestination(icon: Icon(Icons.flag_outlined), selectedIcon: Icon(Icons.flag), label: '버킷'),
-          NavigationDestination(icon: Icon(Icons.track_changes), label: '목표'),
-          NavigationDestination(icon: Icon(Icons.menu_book_outlined), selectedIcon: Icon(Icons.menu_book), label: '일기'),
-          NavigationDestination(icon: Icon(Icons.work_outline), selectedIcon: Icon(Icons.work), label: '커리어'),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.home_outlined), selectedIcon: const Icon(Icons.home), label: tr.tabHome),
+          NavigationDestination(icon: const Icon(Icons.flag_outlined), selectedIcon: const Icon(Icons.flag), label: tr.tabBucket),
+          NavigationDestination(icon: const Icon(Icons.track_changes), label: tr.tabGoals),
+          NavigationDestination(icon: const Icon(Icons.menu_book_outlined), selectedIcon: const Icon(Icons.menu_book), label: tr.tabDiary),
+          NavigationDestination(icon: const Icon(Icons.work_outline), selectedIcon: const Icon(Icons.work), label: tr.tabCareer),
         ],
       ),
     );

@@ -39,7 +39,14 @@ class LifeBoxWidgetProvider : HomeWidgetProvider() {
         }
         val hidden = widgetData.getString("hidden", "false") == "true"
         val goalCount = widgetData.getString("goal_count", "0")?.toIntOrNull() ?: 0
-        val dateLabel = SimpleDateFormat("M월 d일 (E)", Locale.KOREAN).format(now.time)
+        // 앱에서 넘겨준 언어와 문구 (없으면 한국어 기본값)
+        val lang = widgetData.getString("lang", "ko") ?: "ko"
+        fun t(key: String, def: String) = widgetData.getString(key, null) ?: def
+        val dateLabel = when (lang) {
+            "ja" -> SimpleDateFormat("M月d日 (E)", Locale.JAPANESE)
+            "en" -> SimpleDateFormat("EEE, MMM d", Locale.ENGLISH)
+            else -> SimpleDateFormat("M월 d일 (E)", Locale.KOREAN)
+        }.format(now.time)
 
         appWidgetIds.forEach { widgetId ->
             val views = RemoteViews(context.packageName, R.layout.lifebox_widget).apply {
@@ -52,13 +59,14 @@ class LifeBoxWidgetProvider : HomeWidgetProvider() {
                     HomeWidgetLaunchIntent.getActivity(context, MainActivity::class.java, Uri.parse("lifebox://diary/new")),
                 )
                 setTextViewText(R.id.widget_date, dateLabel)
-                setTextViewText(R.id.widget_streak, if (streak > 0) "🔥 ${streak}일 연속" else "")
-                setTextViewText(R.id.widget_diary, if (doneToday) "✓ 오늘 일기 완료" else "오늘 일기를 아직 안 썼어요")
+                setTextViewText(R.id.widget_streak, if (streak > 0) t("t_streak", "🔥 {n}일 연속").replace("{n}", streak.toString()) else "")
+                setTextViewText(R.id.widget_diary, if (doneToday) t("t_done", "✓ 오늘 일기 완료") else t("t_todo", "오늘 일기를 아직 안 썼어요"))
+                setTextViewText(R.id.widget_write, t("t_write", "＋ 일기 쓰기"))
                 setViewVisibility(R.id.widget_write, if (doneToday) View.GONE else View.VISIBLE)
 
                 if (hidden) {
                     // 앱 잠금 중에는 목표 제목을 홈 화면에 드러내지 않음
-                    setTextViewText(R.id.widget_goal1, "🔒 진행 중인 목표 ${goalCount}개")
+                    setTextViewText(R.id.widget_goal1, t("t_locked", "🔒 진행 중인 목표 {n}개").replace("{n}", goalCount.toString()))
                     setViewVisibility(R.id.widget_goal1, View.VISIBLE)
                     setViewVisibility(R.id.widget_goal1_bar, View.GONE)
                     setViewVisibility(R.id.widget_goal2, View.GONE)
@@ -67,7 +75,7 @@ class LifeBoxWidgetProvider : HomeWidgetProvider() {
                     bindGoal(this, widgetData, 1, R.id.widget_goal1, R.id.widget_goal1_bar)
                     bindGoal(this, widgetData, 2, R.id.widget_goal2, R.id.widget_goal2_bar)
                     if (goalCount == 0) {
-                        setTextViewText(R.id.widget_goal1, "진행 중인 목표가 없어요")
+                        setTextViewText(R.id.widget_goal1, t("t_no_goals", "진행 중인 목표가 없어요"))
                         setViewVisibility(R.id.widget_goal1, View.VISIBLE)
                     }
                 }

@@ -6,6 +6,7 @@ import 'bucket.dart';
 import 'career.dart';
 import 'diary.dart';
 import 'goals.dart';
+import '../i18n.dart';
 
 /// 일기·버킷·목표·커리어 통합 검색
 class SearchScreen extends StatefulWidget {
@@ -58,7 +59,7 @@ class _SearchScreenState extends State<SearchScreen> {
           .toList();
 
       if (diaries.isNotEmpty) {
-        results.add(SectionTitle('일기 ${diaries.length}'));
+        results.add(SectionTitle(tr.searchSection(tr.diary, diaries.length)));
         for (final e in diaries) {
           results.add(Card(
             child: ListTile(
@@ -76,19 +77,19 @@ class _SearchScreenState extends State<SearchScreen> {
         }
       }
       if (buckets.isNotEmpty) {
-        results.add(SectionTitle('버킷리스트 ${buckets.length}'));
+        results.add(SectionTitle(tr.searchSection(tr.bucketList, buckets.length)));
         results.addAll(buckets.map((b) => BucketTile(item: b)));
       }
       if (goals.isNotEmpty) {
-        results.add(SectionTitle('목표 ${goals.length}'));
+        results.add(SectionTitle(tr.searchSection(tr.goals, goals.length)));
         results.addAll(goals.map((g) => GoalCard(goal: g)));
       }
       if (careers.isNotEmpty) {
-        results.add(SectionTitle('커리어 ${careers.length}'));
+        results.add(SectionTitle(tr.searchSection(tr.tabCareer, careers.length)));
         results.addAll(careers.map((c) => CareerCard(item: c)));
       }
       if (results.isEmpty) {
-        results.add(EmptyState(icon: Icons.search_off, text: "'$_q'에 해당하는 기록이 없어요"));
+        results.add(EmptyState(icon: Icons.search_off, text: tr.searchNoResult(_q)));
       }
     }
     return results;
@@ -104,7 +105,7 @@ class _SearchScreenState extends State<SearchScreen> {
           autofocus: true,
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
-            hintText: '모든 기록에서 검색',
+            hintText: tr.searchHint,
             border: InputBorder.none,
             suffixIcon: _q.isEmpty
                 ? null
@@ -122,7 +123,7 @@ class _SearchScreenState extends State<SearchScreen> {
       body: ListenableBuilder(
         listenable: store,
         builder: (context, _) => _q.isEmpty
-            ? const EmptyState(icon: Icons.search, text: '일기, 버킷리스트, 목표, 커리어를\n한 번에 찾을 수 있어요')
+            ? EmptyState(icon: Icons.search, text: tr.searchEmpty)
             : ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: _results(context)),
       ),
     );

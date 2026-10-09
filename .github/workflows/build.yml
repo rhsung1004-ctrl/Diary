@@ -40,6 +40,14 @@ jobs:
           EOF
 
       - run: flutter pub get
+
+      # 코드 오류를 Actions 화면에 바로 표시
+      - name: Analyze
+        run: |
+          flutter analyze --no-fatal-infos --no-fatal-warnings > analyze.txt 2>&1 || true
+          grep -E "^\s*error" analyze.txt | head -50 | while IFS= read -r line; do echo "::error::$line"; done
+          ! grep -qE "^\s*error" analyze.txt
+
       - run: flutter test
 
       # 빌드 번호(versionCode)는 매번 1씩 올라감 → 플레이스토어 업로드 조건 충족

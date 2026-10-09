@@ -11,6 +11,7 @@ import '../portfolio_pdf.dart';
 import '../prefs.dart';
 import '../store.dart';
 import '../theme.dart';
+import '../i18n.dart';
 
 /// 내 프로필 (포트폴리오 표지)
 class ProfileEditor extends StatefulWidget {
@@ -70,21 +71,21 @@ class _ProfileEditorState extends State<ProfileEditor> with DirtyGuard<ProfileEd
   Widget build(BuildContext context) {
     return guard(Scaffold(
       appBar: AppBar(
-        title: const Text('내 프로필'),
-        actions: [TextButton(onPressed: _save, child: const Text('저장'))],
+        title: Text(tr.myProfile),
+        actions: [TextButton(onPressed: _save, child: Text(tr.save))],
       ),
       body: ListView(padding: const EdgeInsets.all(16), children: [
-        Text('포트폴리오 PDF의 첫 부분에 들어가요.', style: Theme.of(context).textTheme.bodySmall),
+        Text(tr.profileHelp, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 16),
-        _field(_name, '이름'),
-        _field(_headline, '한 줄 소개', hint: '예) 사용자 경험을 고민하는 앱 개발자'),
-        _field(_email, '이메일 (선택)', type: TextInputType.emailAddress),
-        _field(_phone, '연락처 (선택)', type: TextInputType.phone),
-        _field(_link, '대표 링크 (선택)', hint: 'GitHub, 블로그, 노션 등', type: TextInputType.url),
-        _field(_intro, '자기소개 (선택)', minLines: 4, maxLines: null),
+        _field(_name, tr.name),
+        _field(_headline, tr.headline, hint: tr.headlineHint),
+        _field(_email, tr.optional(tr.email), type: TextInputType.emailAddress),
+        _field(_phone, tr.optional(tr.phone), type: TextInputType.phone),
+        _field(_link, tr.optional(tr.mainLink), hint: tr.mainLinkHint, type: TextInputType.url),
+        _field(_intro, tr.optional(tr.intro), minLines: 4, maxLines: null),
         PhotoEditor(
           photos: _photos,
-          label: '프로필 사진 (마지막에 추가한 1장 사용)',
+          label: tr.profilePhoto,
           onChanged: markDirty,
         ),
       ]),
@@ -112,7 +113,7 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
 
   void _preview() {
     if (_types.isEmpty) {
-      toast(context, '넣을 항목을 하나 이상 골라 주세요');
+      toast(context, tr.pdfPickOne);
       return;
     }
     final prefs = AppPrefs.instance;
@@ -131,13 +132,13 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
     final t = Theme.of(context);
     final profile = store.profile;
     return Scaffold(
-      appBar: AppBar(title: const Text('포트폴리오 PDF')),
+      appBar: AppBar(title: Text(tr.portfolioPdf)),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         Card(
           child: ListTile(
             leading: const Icon(Icons.badge_outlined),
-            title: Text(profile.name.isEmpty ? '프로필이 비어 있어요' : profile.name),
-            subtitle: Text(profile.isEmpty ? '이름과 소개를 넣으면 PDF 맨 위에 들어가요' : profile.headline),
+            title: Text(profile.name.isEmpty ? tr.profileEmpty : profile.name),
+            subtitle: Text(profile.isEmpty ? tr.profileEmptySub : profile.headline),
             trailing: const Icon(Icons.chevron_right),
             onTap: () async {
               await Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileEditor()));
@@ -145,12 +146,12 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
             },
           ),
         ),
-        const SectionTitle('넣을 항목'),
+        SectionTitle(tr.pdfSections),
         for (final type in portfolioOrder)
           CheckboxListTile(
             contentPadding: EdgeInsets.zero,
-            title: Text(type),
-            subtitle: Text('${_count(type)}개'),
+            title: Text(careerTypeLabel(type)),
+            subtitle: Text(tr.countItems(_count(type))),
             value: _types.contains(type),
             onChanged: _count(type) == 0
                 ? null
@@ -158,21 +159,21 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
           ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
-          title: const Text('이미지 포함'),
-          subtitle: const Text('항목마다 최대 3장'),
+          title: Text(tr.pdfImages),
+          subtitle: Text(tr.pdfImagesSub),
           value: _images,
           onChanged: (v) => setState(() => _images = v),
         ),
         const SizedBox(height: 16),
         FilledButton.icon(
           icon: const Icon(Icons.picture_as_pdf_outlined),
-          label: const Text('PDF 만들기'),
+          label: Text(tr.pdfMake),
           onPressed: store.careers.isEmpty ? null : _preview,
         ),
         if (store.careers.isEmpty)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: Text('커리어 항목을 먼저 추가해 주세요', style: t.textTheme.bodySmall),
+            child: Text(tr.pdfAddCareerFirst, style: t.textTheme.bodySmall),
           ),
       ]),
     );
@@ -185,17 +186,17 @@ class _PdfPreviewScreen extends StatelessWidget {
 
   String get _fileName {
     final name = AppStore.instance.profile.name;
-    return name.isEmpty ? 'portfolio.pdf' : '${name}_포트폴리오.pdf';
+    return name.isEmpty ? 'portfolio.pdf' : '${name}_${tr.pdfFileSuffix}.pdf';
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('미리보기'),
+        title: Text(tr.preview),
         actions: [
           IconButton(
-            tooltip: '인쇄',
+            tooltip: tr.print,
             icon: const Icon(Icons.print_outlined),
             onPressed: () async {
               final b = await bytes;
@@ -203,7 +204,7 @@ class _PdfPreviewScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            tooltip: '공유·저장',
+            tooltip: tr.shareSave,
             icon: const Icon(Icons.share_outlined),
             onPressed: () async {
               final b = await bytes;

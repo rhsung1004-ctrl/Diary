@@ -7,6 +7,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 import 'prefs.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 /// 매일 일기 알림.
 /// 오늘 일기를 이미 썼으면 첫 알림을 내일로 미뤄서, 쓴 날엔 울리지 않게 함.
@@ -69,14 +70,14 @@ class Reminder {
 
     await _plugin.zonedSchedule(
       id: _id,
-      title: '오늘 하루는 어땠나요?',
-      body: '잠깐 시간 내서 오늘을 기록해 볼까요? ✍️',
+      title: tr.reminderTitle,
+      body: tr.reminderBody,
       scheduledDate: tz.TZDateTime.from(at, tz.UTC),
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           'daily_diary',
-          '일기 알림',
-          channelDescription: '매일 정해진 시간에 일기 쓰기를 알려줘요',
+          tr.reminderChannel,
+          channelDescription: tr.reminderChannelDesc,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),

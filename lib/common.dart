@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+import 'i18n.dart';
 
 String two(int n) => n.toString().padLeft(2, '0');
-const _weekdays = ['월', '화', '수', '목', '금', '토', '일'];
-String weekday(DateTime d) => _weekdays[d.weekday - 1];
-String fmtDate(DateTime d) => '${d.year}.${two(d.month)}.${two(d.day)}';
-String fmtDateW(DateTime d) => '${fmtDate(d)} (${weekday(d)})';
-String fmtDateTime(DateTime d) => '${fmtDateW(d)} ${two(d.hour)}:${two(d.minute)}';
+String weekday(DateTime d) => DateFormat.E(appLang).format(d);
+String fmtDate(DateTime d) => DateFormat.yMd(appLang).format(d);
+String fmtDateW(DateTime d) => DateFormat.yMMMEd(appLang).format(d);
+String fmtDateTime(DateTime d) => '${fmtDateW(d)} ${DateFormat.Hm(appLang).format(d)}';
+String fmtMonthTitle(DateTime d) => DateFormat.yMMMM(appLang).format(d);
 String fmtMonth(DateTime d) => '${d.year}.${two(d.month)}';
 bool sameDay(DateTime a, DateTime b) =>
     a.year == b.year && a.month == b.month && a.day == b.day;
@@ -49,7 +52,7 @@ Future<bool> confirmDialog(
       title: Text(title),
       content: Text(message),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('취소')),
+        TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr.cancel)),
         FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(okLabel)),
       ],
     ),
@@ -109,7 +112,7 @@ class SectionTitle extends StatelessWidget {
                 .titleMedium
                 ?.copyWith(fontWeight: FontWeight.bold)),
         const Spacer(),
-        if (onMore != null) TextButton(onPressed: onMore, child: const Text('전체 보기')),
+        if (onMore != null) TextButton(onPressed: onMore, child: Text(tr.seeAll)),
       ]),
     );
   }
@@ -129,7 +132,7 @@ class DateTile extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: const Icon(Icons.event_outlined),
       title: Text(label),
-      subtitle: Text(value == null ? '선택 안 함' : fmtDateW(value!)),
+      subtitle: Text(value == null ? tr.notSelected : fmtDateW(value!)),
       trailing: value != null && onClear != null
           ? IconButton(icon: const Icon(Icons.close), onPressed: onClear)
           : null,
@@ -153,7 +156,7 @@ mixin DirtyGuard<T extends StatefulWidget> on State<T> {
         canPop: !dirty,
         onPopInvokedWithResult: (didPop, _) async {
           if (didPop) return;
-          final leave = await confirmDialog(context, '저장하지 않고 나갈까요?', '수정한 내용이 사라져요.', '나가기');
+          final leave = await confirmDialog(context, tr.leaveTitle, tr.leaveBody, tr.leave);
           if (leave && mounted) {
             dirty = false;
             Navigator.of(context).pop();

@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../common.dart';
 import '../lock.dart';
 import '../store.dart';
+import '../i18n.dart';
 
 /// 한 해 통계 요약
 class _YearData {
@@ -112,10 +113,10 @@ class _YearReviewScreenState extends State<YearReviewScreen> {
       await file.writeAsBytes(png!.buffer.asUint8List());
       await AppLock.instance.runExternal(() => SharePlus.instance.share(ShareParams(
             files: [XFile(file.path, mimeType: 'image/png')],
-            text: '나의 $_year년 #LifeBox',
+            text: tr.shareText(_year),
           )));
     } catch (e) {
-      if (mounted) toast(context, '이미지를 만들지 못했어요: $e');
+      if (mounted) toast(context, tr.imageFail(e));
     } finally {
       if (mounted) setState(() => _sharing = false);
     }
@@ -125,7 +126,7 @@ class _YearReviewScreenState extends State<YearReviewScreen> {
   Widget build(BuildContext context) {
     final data = _YearData.of(AppStore.instance, _year);
     return Scaffold(
-      appBar: AppBar(title: const Text('연말 결산')),
+      appBar: AppBar(title: Text(tr.yearReview)),
       body: ListView(padding: const EdgeInsets.all(16), children: [
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -134,7 +135,7 @@ class _YearReviewScreenState extends State<YearReviewScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
-                  label: Text('$y년'),
+                  label: Text(tr.yearLabel(y)),
                   selected: y == _year,
                   onSelected: (_) => setState(() => _year = y),
                 ),
@@ -148,7 +149,7 @@ class _YearReviewScreenState extends State<YearReviewScreen> {
           icon: _sharing
               ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
               : const Icon(Icons.ios_share),
-          label: const Text('이미지로 공유'),
+          label: Text(tr.shareImage),
           onPressed: _sharing ? null : _share,
         ),
       ]),
@@ -195,20 +196,20 @@ class _ReviewCard extends StatelessWidget {
           child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('LifeBox', style: st(12, w: FontWeight.bold, opacity: 0.8)),
             SizedBox(height: 4 * k),
-            Text('나의 ${data.year}년', style: st(30, w: FontWeight.bold)),
+            Text(tr.myYear(data.year), style: st(30, w: FontWeight.bold)),
             SizedBox(height: 20 * k),
             Row(children: [
-              stat('📔', '${data.diaries}편', '일기 · ${data.daysWritten}일 기록'),
-              stat('🔥', '${data.longestStreak}일', '최장 연속 기록'),
-              stat(data.topMood ?? '🙂', data.topMood == null ? '-' : '${data.topMoodCount}번', '가장 많이 느낀 기분'),
+              stat('📔', tr.countEntries(data.diaries), tr.rvDiarySub(data.daysWritten)),
+              stat('🔥', tr.countDays(data.longestStreak), tr.rvLongest),
+              stat(data.topMood ?? '🙂', data.topMood == null ? '-' : tr.rvTimes(data.topMoodCount), tr.rvTopMood),
             ]),
             SizedBox(height: 20 * k),
             Container(height: 1, color: Colors.white.withValues(alpha: 0.3)),
             SizedBox(height: 16 * k),
-            Text('🏆 버킷리스트 ${data.bucketsDone.length}개 달성', style: st(15, w: FontWeight.bold)),
+            Text(tr.rvBuckets(data.bucketsDone.length), style: st(15, w: FontWeight.bold)),
             SizedBox(height: 6 * k),
             if (data.bucketsDone.isEmpty)
-              Text('내년엔 하나씩 이뤄봐요', style: st(12, opacity: 0.8))
+              Text(tr.rvBucketsNone, style: st(12, opacity: 0.8))
             else
               for (final b in data.bucketsDone.take(3))
                 Padding(
@@ -216,14 +217,14 @@ class _ReviewCard extends StatelessWidget {
                   child: Text('· $b', maxLines: 1, overflow: TextOverflow.ellipsis, style: st(12, opacity: 0.9)),
                 ),
             if (data.bucketsDone.length > 3)
-              Text('외 ${data.bucketsDone.length - 3}개', style: st(11, opacity: 0.7)),
+              Text(tr.rvMore(data.bucketsDone.length - 3), style: st(11, opacity: 0.7)),
             SizedBox(height: 14 * k),
             Text(
-              data.goalsSet == 0 ? '🎯 세운 목표 없음' : '🎯 목표 ${data.goalsSet}개 중 ${data.goalsDone}개 완료',
+              data.goalsSet == 0 ? tr.rvNoGoals : tr.rvGoals(data.goalsSet, data.goalsDone),
               style: st(15, w: FontWeight.bold),
             ),
             SizedBox(height: 14 * k),
-            Text('💼 새 커리어 기록 ${data.careers}개', style: st(15, w: FontWeight.bold)),
+            Text(tr.rvCareers(data.careers), style: st(15, w: FontWeight.bold)),
             if (data.topSkills.isNotEmpty) ...[
               SizedBox(height: 4 * k),
               Text(data.topSkills.join(' · '), style: st(12, opacity: 0.85)),
@@ -240,9 +241,9 @@ class _ReviewCard extends StatelessWidget {
   }
 
   String _closing(_YearData d) {
-    if (d.diaries >= 200) return '매일을 기록한 한 해, 정말 대단해요 ✨';
-    if (d.bucketsDone.length >= 3) return '꿈을 하나씩 현실로 만든 한 해 🌱';
-    if (d.diaries > 0) return '기록한 만큼 단단해진 한 해 💪';
-    return '새로운 기록을 시작해 봐요 ✍️';
+    if (d.diaries >= 200) return tr.rvClose1;
+    if (d.bucketsDone.length >= 3) return tr.rvClose2;
+    if (d.diaries > 0) return tr.rvClose3;
+    return tr.rvClose4;
   }
 }

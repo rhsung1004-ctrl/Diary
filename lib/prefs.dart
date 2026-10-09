@@ -14,6 +14,7 @@ class AppPrefs extends ChangeNotifier {
   ThemeMode themeMode = ThemeMode.system;
   String font = 'pretendard';
   double textScale = 1.0;
+  String language = 'system'; // system | ko | en | ja
 
   // 일기 알림
   bool reminderOn = false;
@@ -39,6 +40,7 @@ class AppPrefs extends ChangeNotifier {
           orElse: () => ThemeMode.system);
       font = m['font'] as String? ?? 'pretendard';
       textScale = (m['textScale'] as num?)?.toDouble() ?? 1.0;
+      language = m['language'] as String? ?? 'system';
       pinHash = m['pinHash'] as String?;
       pinSalt = m['pinSalt'] as String?;
       biometric = m['biometric'] as bool? ?? false;
@@ -59,6 +61,7 @@ class AppPrefs extends ChangeNotifier {
       'themeMode': themeMode.name,
       'font': font,
       'textScale': textScale,
+      'language': language,
       'pinHash': pinHash,
       'pinSalt': pinSalt,
       'biometric': biometric,
@@ -69,6 +72,9 @@ class AppPrefs extends ChangeNotifier {
     }));
     await tmp.rename(_file.path);
   }
+
+  /// 기기 언어가 바뀌었을 때 화면 다시 그리기
+  void refresh() => notifyListeners();
 
   Future<void> update(void Function(AppPrefs p) change) async {
     change(this);

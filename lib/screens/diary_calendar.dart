@@ -4,6 +4,7 @@ import '../common.dart';
 import '../models.dart';
 import '../store.dart';
 import 'diary.dart';
+import '../i18n.dart';
 
 /// 월 달력: 날짜마다 그날 기분(없으면 점) 표시, 누르면 그날 일기
 class DiaryCalendar extends StatefulWidget {
@@ -35,7 +36,7 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
               DiaryCard(entry: e),
             TextButton.icon(
               icon: const Icon(Icons.add),
-              label: const Text('이 날 일기 더 쓰기'),
+              label: Text(tr.calWriteMore),
               onPressed: () {
                 Navigator.pop(ctx);
                 openDiaryEditor(context, null, date: day);
@@ -70,19 +71,20 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
           Row(children: [
             IconButton(icon: const Icon(Icons.chevron_left), onPressed: () => _move(-1)),
             Expanded(
-              child: Text('${_month.year}년 ${_month.month}월',
+              child: Text(fmtMonthTitle(_month),
                   textAlign: TextAlign.center,
                   style: t.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
             ),
             IconButton(icon: const Icon(Icons.chevron_right), onPressed: () => _move(1)),
           ]),
           Row(children: [
-            for (final w in ['월', '화', '수', '목', '금', '토', '일'])
+            // 2024-01-01은 월요일 → 월~일 요일 이름을 언어에 맞게
+            for (var i = 0; i < 7; i++)
               Expanded(
                 child: Center(
-                  child: Text(w,
+                  child: Text(weekday(DateTime(2024, 1, 1 + i)),
                       style: t.textTheme.labelMedium?.copyWith(
-                          color: w == '일'
+                          color: i == 6
                               ? t.colorScheme.error
                               : t.colorScheme.onSurfaceVariant)),
                 ),
@@ -95,7 +97,7 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
                 Expanded(child: _cell(context, r * 7 + c - lead + 1, daysInMonth, byDay, today)),
             ]),
           const SizedBox(height: 12),
-          Text('이번 달 ${byDay.values.fold(0, (a, b) => a + b.length)}편 · 날짜를 누르면 일기를 보거나 쓸 수 있어요',
+          Text(tr.calFooter(byDay.values.fold(0, (a, b) => a + b.length)),
               textAlign: TextAlign.center,
               style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
         ]);

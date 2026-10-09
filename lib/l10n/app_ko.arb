@@ -1,0 +1,634 @@
+{
+  "@@locale": "ko",
+  "appName": "LifeBox",
+  "save": "저장",
+  "cancel": "취소",
+  "delete": "삭제",
+  "ok": "확인",
+  "seeAll": "전체 보기",
+  "notSelected": "선택 안 함",
+  "leaveTitle": "저장하지 않고 나갈까요?",
+  "leaveBody": "수정한 내용이 사라져요.",
+  "leave": "나가기",
+  "deleteConfirmTitle": "삭제할까요?",
+  "deleteItemBody": "\"{title}\"을(를) 삭제해요.",
+  "@deleteItemBody": {
+    "placeholders": {
+      "title": {
+        "type": "Object"
+      }
+    }
+  },
+  "countItems": "{n}개",
+  "@countItems": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "countEntries": "{n}편",
+  "@countEntries": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "countDays": "{n}일",
+  "@countDays": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "all": "전체",
+  "optional": "{label} (선택)",
+  "@optional": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      }
+    }
+  },
+  "present": "현재",
+  "inProgress": "진행 중",
+  "done": "완료",
+  "tabHome": "홈",
+  "tabBucket": "버킷",
+  "tabGoals": "목표",
+  "tabDiary": "일기",
+  "tabCareer": "커리어",
+  "photos": "사진",
+  "photoLoadFail": "사진을 불러오지 못했어요: {error}",
+  "@photoLoadFail": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "pickGallery": "갤러리에서 선택",
+  "pickCamera": "카메라로 찍기",
+  "periodYear": "올해",
+  "periodMonth": "이번 달",
+  "periodWeek": "이번 주",
+  "periodLong": "장기",
+  "typeProject": "프로젝트",
+  "typeWork": "경력",
+  "typeEducation": "학력",
+  "typeAward": "자격·수상",
+  "typeActivity": "활동",
+  "colorForest": "숲",
+  "colorOcean": "바다",
+  "colorLavender": "라벤더",
+  "colorCoral": "코랄",
+  "colorBlossom": "벚꽃",
+  "colorMono": "모노",
+  "fontSystem": "기기 기본",
+  "reminderTitle": "오늘 하루는 어땠나요?",
+  "reminderBody": "잠깐 시간 내서 오늘을 기록해 볼까요? ✍️",
+  "reminderChannel": "일기 알림",
+  "reminderChannelDesc": "매일 정해진 시간에 일기 쓰기를 알려줘요",
+  "lockReason": "LifeBox 잠금 해제",
+  "lockRetryIn": "{s}초 뒤에 다시 시도해 주세요",
+  "@lockRetryIn": {
+    "placeholders": {
+      "s": {
+        "type": "Object"
+      }
+    }
+  },
+  "lockTooMany": "5번 틀려서 30초 동안 잠겨요",
+  "lockWrong": "PIN이 맞지 않아요",
+  "lockForgotTitle": "PIN을 잊으셨나요?",
+  "lockForgotNoAccount": "잠금을 켤 때 구글 계정이 연결되어 있지 않아 이 화면에서 풀 수 없어요.\n\n앱을 지우고 다시 설치한 뒤, 구글 드라이브 백업이 있다면 설정에서 복원할 수 있어요.",
+  "lockGoogleTitle": "구글 계정으로 잠금 해제",
+  "lockGoogleBody": "{email} 계정으로 로그인하면 잠금이 풀리고 PIN이 초기화돼요.",
+  "@lockGoogleBody": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "signIn": "로그인",
+  "lockWrongAccount": "잠금을 설정한 계정({email})으로 로그인해 주세요",
+  "@lockWrongAccount": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "lockEnterPin": "PIN을 입력해 주세요",
+  "lockForgot": "PIN을 잊었어요",
+  "pinMismatch": "두 PIN이 달라요. 처음부터 다시 입력해 주세요",
+  "pinSetup": "PIN 설정",
+  "pinNew": "새 PIN 4자리를 입력해 주세요",
+  "pinAgain": "한 번 더 입력해 주세요",
+  "bkNotConfigured": "아직 구글 연동 설정이 끝나지 않았어요",
+  "bkConnectFirst": "구글 계정을 먼저 연결해 주세요",
+  "bkNeedPermission": "드라이브 권한이 필요해요",
+  "bkChecking": "드라이브 확인 중…",
+  "bkUploadingPhotos": "사진 올리는 중 {i}/{n}",
+  "@bkUploadingPhotos": {
+    "placeholders": {
+      "i": {
+        "type": "Object"
+      },
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "bkSavingData": "기록 저장 중…",
+  "bkFinding": "백업 찾는 중…",
+  "bkNoBackup": "드라이브에 백업이 없어요",
+  "bkDownloadingPhotos": "사진 받는 중 {i}/{n}",
+  "@bkDownloadingPhotos": {
+    "placeholders": {
+      "i": {
+        "type": "Object"
+      },
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "bkRestoring": "기록 복원 중…",
+  "errCanceled": "로그인을 취소했어요",
+  "errGoogle": "구글 로그인에 실패했어요 ({code})",
+  "@errGoogle": {
+    "placeholders": {
+      "code": {
+        "type": "Object"
+      }
+    }
+  },
+  "errNetwork": "인터넷 연결을 확인해 주세요",
+  "errGeneric": "문제가 생겼어요: {error}",
+  "@errGeneric": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "goals": "목표",
+  "goalsActiveCount": "진행 중 {n}",
+  "@goalsActiveCount": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "goalsDoneCount": "완료 {n}",
+  "@goalsDoneCount": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "goalsEmpty": "올해, 이번 달, 이번 주의\n목표를 세워 보세요",
+  "goalsNoneDone": "아직 완료한 목표가 없어요",
+  "goalAchieved": "달성 완료",
+  "goalAddTasksHint": "할 일을 추가해 보세요",
+  "goalTaskProgress": "할 일 {done}/{total} · {pct}%",
+  "@goalTaskProgress": {
+    "placeholders": {
+      "done": {
+        "type": "Object"
+      },
+      "total": {
+        "type": "Object"
+      },
+      "pct": {
+        "type": "Object"
+      }
+    }
+  },
+  "goalEnterTitle": "목표를 입력해 주세요",
+  "goalDeleteBody": "\"{title}\" 목표를 삭제해요.",
+  "@goalDeleteBody": {
+    "placeholders": {
+      "title": {
+        "type": "Object"
+      }
+    }
+  },
+  "goalNew": "새 목표",
+  "goalTitleHint": "예) 자격증 시험 합격",
+  "goalPeriod": "기간",
+  "goalDue": "마감일 (선택)",
+  "goalTasks": "할 일",
+  "goalAddTask": "할 일 추가",
+  "memo": "메모",
+  "goalMemoHint": "왜 이루고 싶은지, 회고…",
+  "goalMarkDone": "목표 달성으로 표시",
+  "goalMarkDoneSub": "할 일과 상관없이 완료로 옮겨요",
+  "bucketList": "버킷리스트",
+  "bucketTrying": "도전 중",
+  "bucketAchieved": "달성",
+  "bucketEmpty": "살면서 꼭 해보고 싶은 일을\n추가해 보세요",
+  "bucketProgress": "{total}개 중 {done}개 달성",
+  "@bucketProgress": {
+    "placeholders": {
+      "total": {
+        "type": "Object"
+      },
+      "done": {
+        "type": "Object"
+      }
+    }
+  },
+  "bucketDoneOn": "{date} 달성",
+  "@bucketDoneOn": {
+    "placeholders": {
+      "date": {
+        "type": "Object"
+      }
+    }
+  },
+  "enterTitle": "제목을 입력해 주세요",
+  "bucketNew": "새 버킷리스트",
+  "bucketEdit": "버킷리스트 수정",
+  "bucketWhat": "하고 싶은 일",
+  "bucketWhatHint": "예) 오로라 보러 가기",
+  "category": "분류",
+  "bucketCategoryHint": "여행, 도전, 배움, 경험…",
+  "bucketMemoHint": "왜 하고 싶은지, 계획, 달성 소감…",
+  "bucketDoneSwitch": "달성했어요",
+  "bucketDoneDate": "달성한 날",
+  "bucketPhotos": "사진 (인증샷, 참고 이미지)",
+  "bucketCongrats": "\"{title}\" 달성!",
+  "@bucketCongrats": {
+    "placeholders": {
+      "title": {
+        "type": "Object"
+      }
+    }
+  },
+  "bucketAskDiary": "이 순간을 일기로 남겨 둘까요?",
+  "bucketAskDiaryPhotos": "이 순간을 일기로 남겨 둘까요?\n버킷에 넣은 사진도 함께 담아 드려요.",
+  "writeDiary": "일기 쓰기",
+  "later": "나중에",
+  "bucketDiaryTitle": "🎉 {title} 달성",
+  "@bucketDiaryTitle": {
+    "placeholders": {
+      "title": {
+        "type": "Object"
+      }
+    }
+  },
+  "diary": "일기",
+  "viewList": "목록으로 보기",
+  "viewCalendar": "달력으로 보기",
+  "todayDiary": "오늘 일기",
+  "diaryEmpty": "첫 일기를 써 보세요\n사진도 함께 남길 수 있어요",
+  "photoDiary": "(사진 일기)",
+  "diaryNeedContent": "내용이나 사진을 넣어 주세요",
+  "diaryDeleteTitle": "일기를 삭제할까요?",
+  "cannotUndo": "삭제하면 되돌릴 수 없어요.",
+  "diaryEdit": "일기 수정",
+  "date": "날짜",
+  "todayMood": "오늘의 기분",
+  "title": "제목",
+  "askPrompt": "질문으로 쓰기",
+  "diaryBody": "오늘 있었던 일",
+  "diaryBodyHint": "자유롭게 적어 보세요",
+  "calWriteMore": "이 날 일기 더 쓰기",
+  "calFooter": "이번 달 {n}편 · 날짜를 누르면 일기를 보거나 쓸 수 있어요",
+  "@calFooter": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "promptToday": "오늘의 질문",
+  "careerTitle": "커리어 · 포트폴리오",
+  "myProfile": "내 프로필",
+  "exportPdf": "PDF로 내보내기",
+  "careerEmpty": "프로젝트, 경력, 자격증을 정리해\n나만의 포트폴리오를 만들어 보세요",
+  "skillsKeywords": "기술 · 키워드",
+  "link": "링크",
+  "linkCopied": "링크를 복사했어요",
+  "enterName": "이름을 입력해 주세요",
+  "careerNew": "새 항목",
+  "careerEdit": "항목 수정",
+  "name": "이름",
+  "careerNameHint": "예) 개인 일정 관리 앱 개발",
+  "careerOrg": "소속 · 역할",
+  "careerOrgHint": "예) 개인 프로젝트 / 개발 전담",
+  "start": "시작",
+  "end": "종료",
+  "description": "설명",
+  "careerDescHint": "무엇을, 왜, 어떻게 했고 결과는 어땠는지",
+  "careerSkillsField": "기술 · 키워드 (쉼표로 구분)",
+  "careerSkillsHint": "Flutter, Python, 영상편집",
+  "careerLinkHint": "GitHub, 블로그, 시연 영상 주소",
+  "careerImages": "이미지 (스크린샷, 결과물, 증명서)",
+  "portfolio": "포트폴리오",
+  "portfolioOf": "{name} 포트폴리오",
+  "@portfolioOf": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "profileHelp": "포트폴리오 PDF의 첫 부분에 들어가요.",
+  "headline": "한 줄 소개",
+  "headlineHint": "예) 사용자 경험을 고민하는 앱 개발자",
+  "email": "이메일",
+  "phone": "연락처",
+  "mainLink": "대표 링크",
+  "mainLinkHint": "GitHub, 블로그, 노션 등",
+  "intro": "자기소개",
+  "profilePhoto": "프로필 사진 (마지막에 추가한 1장 사용)",
+  "pdfPickOne": "넣을 항목을 하나 이상 골라 주세요",
+  "portfolioPdf": "포트폴리오 PDF",
+  "profileEmpty": "프로필이 비어 있어요",
+  "profileEmptySub": "이름과 소개를 넣으면 PDF 맨 위에 들어가요",
+  "pdfSections": "넣을 항목",
+  "pdfImages": "이미지 포함",
+  "pdfImagesSub": "항목마다 최대 3장",
+  "pdfMake": "PDF 만들기",
+  "pdfAddCareerFirst": "커리어 항목을 먼저 추가해 주세요",
+  "pdfFileSuffix": "포트폴리오",
+  "preview": "미리보기",
+  "print": "인쇄",
+  "shareSave": "공유·저장",
+  "search": "검색",
+  "stats": "통계",
+  "settings": "설정",
+  "activeGoals": "진행 중 목표",
+  "todaysDiary": "오늘의 일기",
+  "notWrittenToday": "아직 오늘 일기를 안 썼어요",
+  "pastToday": "📅 지난 오늘",
+  "yearsAgoToday": "{n}년 전 오늘",
+  "@yearsAgoToday": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "yearReviewCard": "{year}년 결산 카드",
+  "@yearReviewCard": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      }
+    }
+  },
+  "yearReviewCardSub": "한 해 기록을 카드 한 장으로 돌아보세요",
+  "goalsInProgress": "진행 중인 목표",
+  "goalsHomeHint": "목표를 세우면 여기에서 진행률을 볼 수 있어요",
+  "recentBuckets": "최근 달성한 버킷리스트",
+  "searchHint": "모든 기록에서 검색",
+  "searchSection": "{label} {n}",
+  "@searchSection": {
+    "placeholders": {
+      "label": {
+        "type": "Object"
+      },
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "searchNoResult": "'{q}'에 해당하는 기록이 없어요",
+  "@searchNoResult": {
+    "placeholders": {
+      "q": {
+        "type": "Object"
+      }
+    }
+  },
+  "searchEmpty": "일기, 버킷리스트, 목표, 커리어를\n한 번에 찾을 수 있어요",
+  "yearReview": "연말 결산",
+  "streak": "연속 작성",
+  "thisMonth": "이번 달",
+  "last15Weeks": "최근 15주 기록",
+  "mood": "기분",
+  "days30": "30일",
+  "goalsAndBuckets": "목표 · 버킷리스트",
+  "heatTap": "{date} · 일기 {n}편",
+  "@heatTap": {
+    "placeholders": {
+      "date": {
+        "type": "Object"
+      },
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "less": "적음",
+  "more": "많음",
+  "noMoodYet": "기분을 고른 일기가 아직 없어요",
+  "noGoalsYet": "아직 목표가 없어요",
+  "avgProgress": "평균 진행률",
+  "noBucketsYet": "아직 버킷리스트가 없어요",
+  "achieveRate": "달성률",
+  "achievedInYear": "{year}년 달성",
+  "@achievedInYear": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      }
+    }
+  },
+  "remaining": "남은 것",
+  "topSkills": "많이 쓴 기술 · 키워드",
+  "noSkillsYet": "커리어 항목에 기술을 적으면 여기에 모여요",
+  "myYear": "나의 {year}년",
+  "@myYear": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      }
+    }
+  },
+  "shareText": "나의 {year}년 #LifeBox",
+  "@shareText": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      }
+    }
+  },
+  "imageFail": "이미지를 만들지 못했어요: {error}",
+  "@imageFail": {
+    "placeholders": {
+      "error": {
+        "type": "Object"
+      }
+    }
+  },
+  "yearLabel": "{year}년",
+  "@yearLabel": {
+    "placeholders": {
+      "year": {
+        "type": "Object"
+      }
+    }
+  },
+  "shareImage": "이미지로 공유",
+  "rvDiarySub": "일기 · {n}일 기록",
+  "@rvDiarySub": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "rvLongest": "최장 연속 기록",
+  "rvTimes": "{n}번",
+  "@rvTimes": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "rvTopMood": "가장 많이 느낀 기분",
+  "rvBuckets": "🏆 버킷리스트 {n}개 달성",
+  "@rvBuckets": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "rvBucketsNone": "내년엔 하나씩 이뤄봐요",
+  "rvMore": "외 {n}개",
+  "@rvMore": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "rvNoGoals": "🎯 세운 목표 없음",
+  "rvGoals": "🎯 목표 {total}개 중 {done}개 완료",
+  "@rvGoals": {
+    "placeholders": {
+      "total": {
+        "type": "Object"
+      },
+      "done": {
+        "type": "Object"
+      }
+    }
+  },
+  "rvCareers": "💼 새 커리어 기록 {n}개",
+  "@rvCareers": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "rvClose1": "매일을 기록한 한 해, 정말 대단해요 ✨",
+  "rvClose2": "꿈을 하나씩 현실로 만든 한 해 🌱",
+  "rvClose3": "기록한 만큼 단단해진 한 해 💪",
+  "rvClose4": "새로운 기록을 시작해 봐요 ✍️",
+  "display": "화면",
+  "notifications": "알림",
+  "security": "보안",
+  "driveBackup": "구글 드라이브 백업",
+  "about": "정보",
+  "language": "언어",
+  "languageSystem": "기기 설정 따르기",
+  "themeColor": "테마 색",
+  "darkMode": "다크 모드",
+  "modeSystem": "기기 설정",
+  "modeLight": "밝게",
+  "modeDark": "어둡게",
+  "font": "글꼴",
+  "textSize": "글자 크기",
+  "fontSample": "오늘 하루도 기록해 볼까요? 123 ABC",
+  "fontLicenseNote": "모든 글꼴은 SIL 오픈 폰트 라이선스로 무료 사용 가능해요.",
+  "notifPermissionOff": "알림 권한이 꺼져 있어요. 휴대폰 설정에서 허용해 주세요",
+  "dailyReminder": "매일 일기 알림",
+  "dailyReminderSub": "그날 일기를 이미 썼으면 울리지 않아요",
+  "reminderTime": "알림 시간",
+  "lockNoAccountTitle": "구글 계정이 연결되지 않았어요",
+  "lockNoAccountBody": "PIN을 잊었을 때 잠금을 풀 방법이 없어요.\n아래 \"구글 드라이브 백업\"에서 계정을 먼저 연결하는 걸 추천해요.\n\n그래도 잠금을 켤까요?",
+  "turnOn": "켜기",
+  "lockOnDone": "앱 잠금을 켰어요",
+  "pinChanged": "PIN을 바꿨어요",
+  "appLock": "앱 잠금",
+  "appLockSub": "앱을 열 때 PIN을 물어봐요",
+  "appLockOffTitle": "앱 잠금을 끌까요?",
+  "turnOff": "끄기",
+  "changePin": "PIN 변경",
+  "useBiometric": "지문·얼굴 인식으로 열기",
+  "pinNoRecovery": "PIN을 잊으면 복구할 수 없어요",
+  "pinRecoveryWith": "PIN을 잊으면 {email} 계정으로 풀 수 있어요",
+  "@pinRecoveryWith": {
+    "placeholders": {
+      "email": {
+        "type": "Object"
+      }
+    }
+  },
+  "backupPreparing": "백업 기능 준비 중",
+  "backupPreparingSub": "구글 연동 설정이 끝나면 사용할 수 있어요.",
+  "backupIntro": "구글 계정을 연결하면 기록과 사진을 내 구글 드라이브에 보관해요.",
+  "backupPrivacy": "드라이브의 숨김 앱 폴더에 저장되어 이 앱만 볼 수 있고, 개발자에게는 전송되지 않아요.",
+  "connectGoogle": "Google 계정 연결",
+  "connected": "연결됐어요",
+  "disconnect": "연결 해제",
+  "lastBackup": "마지막 백업",
+  "noneYet": "아직 없어요",
+  "backupNow": "지금 백업",
+  "backedUp": "백업했어요",
+  "restore": "복원",
+  "autoBackup": "자동 백업",
+  "autoBackupSub": "기록이 바뀌었으면 앱을 나갈 때 알아서 백업해요",
+  "disconnectTitle": "연결을 해제할까요?",
+  "disconnectBody": "드라이브에 있는 백업은 지워지지 않아요. 다시 연결하면 복원할 수 있어요.",
+  "disconnectAction": "해제",
+  "disconnected": "연결을 해제했어요",
+  "restoreTitle": "백업으로 복원할까요?",
+  "restoreBody": "{time} 백업으로 지금 폰의 기록을 바꿔요.\n그 이후에 쓴 기록은 사라질 수 있어요.",
+  "@restoreBody": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      }
+    }
+  },
+  "restored": "복원했어요",
+  "privacyPolicy": "개인정보처리방침",
+  "copyAddress": "주소 복사",
+  "addressCopied": "주소를 복사했어요. 브라우저에 붙여넣어 보세요",
+  "openSourceLicenses": "오픈소스 라이선스",
+  "wDone": "✓ 오늘 일기 완료",
+  "wTodo": "오늘 일기를 아직 안 썼어요",
+  "wStreak": "🔥 {n}일 연속",
+  "@wStreak": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "wWrite": "＋ 일기 쓰기",
+  "wNoGoals": "진행 중인 목표가 없어요",
+  "wLocked": "🔒 진행 중인 목표 {n}개",
+  "@wLocked": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  }
+}

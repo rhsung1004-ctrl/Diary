@@ -9,6 +9,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 
 import 'config.dart';
 import 'store.dart';
+import 'i18n.dart';
 
 class BackupException implements Exception {
   final String message;
@@ -87,7 +88,7 @@ class BackupService extends ChangeNotifier {
   // ───── 계정 ─────
   Future<void> connect() async {
     await _ready.future;
-    if (!configured) throw BackupException('아직 구글 연동 설정이 끝나지 않았어요');
+    if (!configured) throw BackupException(tr.bkNotConfigured);
     account = await GoogleSignIn.instance.authenticate();
     // 드라이브 권한도 바로 받아 둔다
     await account!.authorizationClient.authorizeScopes(_scopes);
@@ -97,7 +98,7 @@ class BackupService extends ChangeNotifier {
   /// 잠금 해제용: 구글 로그인 후 이메일 반환
   Future<String?> verifyGoogleAccount() async {
     await _ready.future;
-    if (!configured) throw BackupException('구글 연동 설정이 없어요');
+    if (!configured) throw BackupException(tr.bkNotConfigured);
     final acc = await GoogleSignIn.instance.authenticate();
     account = acc;
     notifyListeners();
@@ -113,15 +114,15 @@ class BackupService extends ChangeNotifier {
 
   Future<drive.DriveApi> _api({required bool interactive}) async {
     await _ready.future;
-    if (!configured) throw BackupException('아직 구글 연동 설정이 끝나지 않았어요');
+    if (!configured) throw BackupException(tr.bkNotConfigured);
     var acc = account;
     if (acc == null) {
-      if (!interactive) throw BackupException('구글 계정을 먼저 연결해 주세요');
+      if (!interactive) throw BackupException(tr.bkConnectFirst);
       acc = account = await GoogleSignIn.instance.authenticate();
     }
     var authz = await acc.authorizationClient.authorizationForScopes(_scopes);
     if (authz == null) {
-      if (!interactive) throw BackupException('드라이브 권한이 필요해요');
+      if (!interactive) throw BackupException(tr.bkNeedPermission);
       authz = await acc.authorizationClient.authorizeScopes(_scopes);
     }
     return drive.DriveApi(authz.authClient(scopes: _scopes));
@@ -160,7 +161,7 @@ class BackupService extends ChangeNotifier {
   Future<void> backup({bool interactive = true}) async {
     if (busy) return;
     busy = true;
-    _setProgress('드라이브 확인 중…');
+    _setProgress(tr.bkChecking);
     try {
       final api = await _api(interactive: interactive);
       final store = AppStore.instance;
@@ -169,7 +170,7 @@ class BackupService extends ChangeNotifier {
 
       final toUpload = photos.where((p) => !remote.containsKey('$_photoPrefix$p')).toList();
       for (var i = 0; i < toUpload.length; i++) {
-        _setProgress('사진 올리는 중 ${i + 1}/${toUpload.length}');
+        _setProgress(tr.bkUploadingPhotos(i + 1, toUpload.length));
         final file = store.photoFile(toUpload[i]);
         if (!await file.exists()) continue;
         await api.files.create(
@@ -180,7 +181,7 @@ class BackupService extends ChangeNotifier {
         );
       }
 
-      _setProgress('기록 저장 중…');
+      _setProgress(tr.bkSavingData);
       final bytes = utf8.encode(jsonEncode(store.toMap()));
       final media = drive.Media(Stream.value(bytes), bytes.length, contentType: 'application/json');
       final existing = remote[_dataName];
@@ -216,12 +217,12 @@ class BackupService extends ChangeNotifier {
   Future<void> restore() async {
     if (busy) return;
     busy = true;
-    _setProgress('백업 찾는 중…');
+    _setProgress(tr.bkFinding);
     try {
       final api = await _api(interactive: true);
       final remote = await _listRemote(api);
       final dataFile = remote[_dataName];
-      if (dataFile?.id == null) throw BackupException('드라이브에 백업이 없어요');
+      if (dataFile?.id == null) throw BackupException(tr.bkNoBackup);
 
       final media = await api.files.get(dataFile!.id!,
           downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
@@ -245,7 +246,7 @@ class BackupService extends ChangeNotifier {
         if (!await store.photoFile(p).exists()) missing.add(p);
       }
       for (var i = 0; i < missing.length; i++) {
-        _setProgress('사진 받는 중 ${i + 1}/${missing.length}');
+        _setProgress(tr.bkDownloadingPhotos(i + 1, missing.length));
         final f = remote['$_photoPrefix${missing[i]}'];
         if (f?.id == null) continue;
         final m = await api.files.get(f!.id!, downloadOptions: drive.DownloadOptions.fullMedia)
@@ -256,7 +257,7 @@ class BackupService extends ChangeNotifier {
         await tmp.rename(store.photoFile(missing[i]).path);
       }
 
-      _setProgress('기록 복원 중…');
+      _setProgress(tr.bkRestoring);
       await store.replaceAll(map);
     } finally {
       busy = false;
@@ -287,9 +288,9 @@ class BackupService extends ChangeNotifier {
 String backupErrorText(Object e) {
   if (e is BackupException) return e.message;
   if (e is GoogleSignInException) {
-    if (e.code == GoogleSignInExceptionCode.canceled) return '로그인을 취소했어요';
-    return '구글 로그인에 실패했어요 (${e.code.name})';
+    if (e.code == GoogleSignInExceptionCode.canceled) return tr.errCanceled;
+    return tr.errGoogle(e.code.name);
   }
-  if (e is SocketException || e is TimeoutException) return '인터넷 연결을 확인해 주세요';
-  return '문제가 생겼어요: $e';
+  if (e is SocketException || e is TimeoutException) return tr.errNetwork;
+  return tr.errGeneric(e);
 }
