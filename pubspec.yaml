@@ -21,6 +21,7 @@ dependencies:
   crypto: any
   pdf: any
   printing: ^5.15.1
+  home_widget: any
 
 dev_dependencies:
   flutter_test:

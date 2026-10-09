@@ -2,13 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:home_widget/home_widget.dart';
 
 import 'backup.dart';
+import 'home_widget_sync.dart';
 import 'lock.dart';
 import 'prefs.dart';
 import 'screens/bucket.dart';
 import 'screens/career.dart';
 import 'screens/diary.dart';
+import 'screens/stats.dart';
 import 'screens/goals.dart';
 import 'screens/home.dart';
 import 'store.dart';
@@ -20,6 +23,7 @@ Future<void> main() async {
   await AppPrefs.instance.load();
   AppLock.instance.lockOnStart();
   registerFontLicenses();
+  HomeWidgetSync.start();
   runApp(const LifeBoxApp());
   // 구글 로그인 복구 → 필요하면 자동 백업 (화면 표시를 막지 않음)
   unawaited(BackupService.instance.init().then((_) => BackupService.instance.autoBackupIfNeeded()));
@@ -77,14 +81,37 @@ class Shell extends StatefulWidget {
 class _ShellState extends State<Shell> with WidgetsBindingObserver {
   int _index = 0;
 
+  StreamSubscription<Uri?>? _widgetClicks;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // 홈 화면 위젯을 눌러서 들어온 경우
+    HomeWidget.initiallyLaunchedFromHomeWidget().then(_openFromWidget);
+    _widgetClicks = HomeWidget.widgetClicked.listen(_openFromWidget);
+  }
+
+  void _openFromWidget(Uri? uri) {
+    if (uri == null || !mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(context).popUntil((r) => r.isFirst);
+      switch (uri.host) {
+        case 'diary':
+          setState(() => _index = 3);
+          openDiaryEditor(context, null);
+        case 'stats':
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsScreen()));
+        default:
+          setState(() => _index = 0);
+      }
+    });
   }
 
   @override
   void dispose() {
+    _widgetClicks?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -95,6 +122,8 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
     // 앱을 나갈 때 자동 백업
     if (state == AppLifecycleState.paused) {
       BackupService.instance.autoBackupIfNeeded();
+    } else if (state == AppLifecycleState.resumed) {
+      HomeWidgetSync.schedule(); // 날짜가 바뀌었을 수 있음
     }
   }
 

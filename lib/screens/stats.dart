@@ -35,7 +35,7 @@ class _StatsScreenState extends State<StatsScreen> {
           return ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
             const SectionTitle('일기'),
             Row(children: [
-              _Tile('연속 작성', '${_streak(diaryDays.keys.toSet(), today)}일'),
+              _Tile('연속 작성', '${diaryStreak(diaryDays.keys.toSet(), today)}일'),
               const SizedBox(width: 8),
               _Tile('이번 달', '$thisMonth편'),
               const SizedBox(width: 8),
@@ -79,16 +79,6 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  /// 오늘(또는 오늘 아직 안 썼으면 어제)부터 거꾸로 이어진 날 수
-  int _streak(Set<DateTime> days, DateTime today) {
-    var d = days.contains(today) ? today : today.subtract(const Duration(days: 1));
-    var n = 0;
-    while (days.contains(d)) {
-      n++;
-      d = DateUtils.dateOnly(d.subtract(const Duration(days: 1)));
-    }
-    return n;
-  }
 }
 
 class _Tile extends StatelessWidget {

@@ -16,6 +16,17 @@ String dday(DateTime due) {
   return diff > 0 ? 'D-$diff' : 'D+${-diff}';
 }
 
+/// 오늘(오늘 아직 안 썼으면 어제)부터 거꾸로 일기가 이어진 날 수
+int diaryStreak(Set<DateTime> days, DateTime today) {
+  var d = days.contains(today) ? today : DateUtils.dateOnly(today.subtract(const Duration(days: 1)));
+  var n = 0;
+  while (days.contains(d)) {
+    n++;
+    d = DateUtils.dateOnly(d.subtract(const Duration(days: 1)));
+  }
+  return n;
+}
+
 T? findById<T>(List<T> list, String id, String Function(T) idOf) {
   for (final e in list) {
     if (idOf(e) == id) return e;
