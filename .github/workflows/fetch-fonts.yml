@@ -1,0 +1,53 @@
+# 한 번만 실행: 상업적 이용이 가능한 무료 한글 폰트(SIL OFL 1.1)를 받아 assets/fonts 에 커밋합니다.
+name: Fetch fonts
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fonts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p assets/fonts/licenses tmp
+          GF=https://raw.githubusercontent.com/google/fonts/main/ofl
+
+          # 고운바탕 / 고운돋움 / 나눔손글씨 펜 (Google Fonts, OFL)
+          curl -fsSL -o assets/fonts/GowunBatang-Regular.ttf  $GF/gowunbatang/GowunBatang-Regular.ttf
+          curl -fsSL -o assets/fonts/GowunBatang-Bold.ttf     $GF/gowunbatang/GowunBatang-Bold.ttf
+          curl -fsSL -o assets/fonts/licenses/GowunBatang-OFL.txt $GF/gowunbatang/OFL.txt
+          curl -fsSL -o assets/fonts/GowunDodum-Regular.ttf   $GF/gowundodum/GowunDodum-Regular.ttf
+          curl -fsSL -o assets/fonts/licenses/GowunDodum-OFL.txt  $GF/gowundodum/OFL.txt
+          curl -fsSL -o assets/fonts/NanumPenScript-Regular.ttf $GF/nanumpenscript/NanumPenScript-Regular.ttf
+          curl -fsSL -o assets/fonts/licenses/NanumPenScript-OFL.txt $GF/nanumpenscript/OFL.txt
+
+          # 프리텐다드 (OFL) - 최신 릴리스 zip 에서 TTF 추출
+          URL=$(gh api repos/orioncactus/pretendard/releases/latest --jq '[.assets[] | select(.name | test("^Pretendard-[0-9.]+\\.zip$"))][0].browser_download_url')
+          echo "Pretendard: $URL"
+          curl -fsSL -o tmp/pretendard.zip "$URL"
+          unzip -q tmp/pretendard.zip -d tmp/pretendard
+          for w in Regular Bold; do
+            f=$(find tmp/pretendard -name "Pretendard-$w.ttf" | head -1)
+            test -n "$f"
+            cp "$f" assets/fonts/Pretendard-$w.ttf
+          done
+          curl -fsSL -o assets/fonts/licenses/Pretendard-OFL.txt https://raw.githubusercontent.com/orioncactus/pretendard/main/LICENSE
+          rm -rf tmp
+          ls -la assets/fonts assets/fonts/licenses
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/fonts
+          git commit -m "OFL 한글 폰트 추가 (Pretendard, 고운바탕, 고운돋움, 나눔손글씨 펜)" || echo "변경 없음"
+          git push
