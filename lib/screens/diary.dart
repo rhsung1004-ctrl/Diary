@@ -264,7 +264,8 @@ class _DiaryEditorState extends State<DiaryEditor>
           ..date = e.date
           ..mood = e.mood
           ..photos = List.of(e.photos)
-          ..tags = List.of(e.tags);
+          ..tags = List.of(e.tags)
+          ..goalId = e.goalId;
         _title.text = e.title;
         _body.text = e.body;
       });
@@ -422,6 +423,35 @@ class _DiaryEditorState extends State<DiaryEditor>
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 16),
+        // 관련 목표 (목표 화면에 이 일기가 모여요)
+        Builder(builder: (context) {
+          final goals = [
+            ...AppStore.instance.goals.where((g) => !g.isComplete),
+            ...AppStore.instance.goals.where((g) => g.isComplete),
+          ];
+          if (goals.isEmpty) return const SizedBox.shrink();
+          final value = goals.any((g) => g.id == d.goalId) ? d.goalId : null;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: DropdownButtonFormField<String?>(
+              initialValue: value,
+              isExpanded: true,
+              decoration: deco(tr.linkedGoal).copyWith(prefixIcon: const Icon(Icons.track_changes)),
+              items: [
+                DropdownMenuItem<String?>(value: null, child: Text(tr.linkedGoalNone)),
+                for (final g in goals)
+                  DropdownMenuItem<String?>(
+                    value: g.id,
+                    child: Text('${g.isComplete ? '✓ ' : ''}${g.title}', overflow: TextOverflow.ellipsis),
+                  ),
+              ],
+              onChanged: (v) {
+                setState(() => d.goalId = v);
+                markDirty();
+              },
+            ),
+          );
+        }),
         Text(tr.tags, style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 6),
         if (d.tags.isNotEmpty)

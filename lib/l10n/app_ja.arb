@@ -337,5 +337,21 @@
   "tagRecent": "よく使うタグ",
   "tagBrowse": "タグで見る",
   "tagNone": "まだタグ付きの日記はありません",
-  "tagEntries": "#{tag} · {n}件"
+  "tagEntries": "#{tag} · {n}件",
+  "linkedGoal": "関連する目標",
+  "linkedGoalNone": "なし",
+  "goalLogs": "この目標のための記録 {n}件",
+  "goalLogsEmpty": "日記でこの目標を選ぶと、過程がここに積み重なります",
+  "goalToCareerTitle": "🎉 目標達成！",
+  "goalToCareerBody": "「{title}」をキャリアに追加しますか？\nやることと関連日記の写真で下書きを作ります。",
+  "goalToCareerYes": "キャリアに追加",
+  "careerDraftDone": "やったこと",
+  "timeline": "わたしのタイムライン",
+  "timelineSub": "夢・目標・記録・成果をひとつの流れで振り返る",
+  "tlEmpty": "記録が増えると、ここにあなたの物語がつながります",
+  "tlBucketDone": "バケットリスト達成",
+  "tlGoalStart": "目標スタート",
+  "tlGoalDone": "目標完了",
+  "tlCareer": "{type} 開始",
+  "tlCount": "{n}の瞬間"
 }

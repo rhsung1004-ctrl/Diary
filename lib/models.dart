@@ -77,6 +77,7 @@ class Goal {
   DateTime? dueDate;
   List<GoalTask> tasks;
   bool done; // 하위 할 일과 상관없이 직접 완료 처리
+  DateTime? completedAt; // 완료된 날 (타임라인용)
   DateTime createdAt;
 
   Goal({
@@ -87,6 +88,7 @@ class Goal {
     this.dueDate,
     List<GoalTask>? tasks,
     this.done = false,
+    this.completedAt,
     DateTime? createdAt,
   })  : id = id ?? newId(),
         tasks = tasks ?? <GoalTask>[],
@@ -112,6 +114,7 @@ class Goal {
         'dueDate': dueDate?.toIso8601String(),
         'tasks': tasks.map((t) => t.toJson()).toList(),
         'done': done,
+        'completedAt': completedAt?.toIso8601String(),
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -125,6 +128,7 @@ class Goal {
             ? (j['tasks'] as List).map((e) => GoalTask.fromJson(_map(e))).toList()
             : <GoalTask>[],
         done: j['done'] as bool? ?? false,
+        completedAt: _date(j['completedAt']),
         createdAt: _date(j['createdAt']),
       );
 }
@@ -140,6 +144,7 @@ class DiaryEntry {
   String mood;
   List<String> photos;
   List<String> tags;
+  String? goalId; // 관련 목표
   DateTime createdAt;
 
   DiaryEntry({
@@ -150,6 +155,7 @@ class DiaryEntry {
     this.mood = '',
     List<String>? photos,
     List<String>? tags,
+    this.goalId,
     DateTime? createdAt,
   })  : id = id ?? newId(),
         date = date ?? DateTime.now(),
@@ -167,6 +173,7 @@ class DiaryEntry {
         'mood': mood,
         'photos': List<String>.from(photos),
         'tags': List<String>.from(tags),
+        'goalId': goalId,
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -178,6 +185,7 @@ class DiaryEntry {
         mood: j['mood'] as String? ?? '',
         photos: _strings(j['photos']),
         tags: _strings(j['tags']),
+        goalId: j['goalId'] as String?,
         createdAt: _date(j['createdAt']),
       );
 }

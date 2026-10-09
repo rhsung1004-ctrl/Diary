@@ -8,6 +8,7 @@ import 'goals.dart';
 import 'settings.dart';
 import 'search.dart';
 import 'stats.dart';
+import 'timeline.dart';
 import 'year_review.dart';
 import '../i18n.dart';
 
@@ -81,6 +82,22 @@ class HomeScreen extends StatelessWidget {
                 _StatCard(Icons.work_outline, tr.tabCareer, tr.countItems(store.careers.length),
                     () => onNavigate(4)),
               ],
+            ),
+            const SizedBox(height: 10),
+            Card(
+              elevation: 0,
+              margin: EdgeInsets.zero,
+              color: t.colorScheme.primaryContainer,
+              child: ListTile(
+                leading: Icon(Icons.timeline, color: t.colorScheme.onPrimaryContainer),
+                title: Text(tr.timeline,
+                    style: TextStyle(fontWeight: FontWeight.bold, color: t.colorScheme.onPrimaryContainer)),
+                subtitle: Text(tr.timelineSub,
+                    style: TextStyle(color: t.colorScheme.onPrimaryContainer.withValues(alpha: 0.8))),
+                trailing: Icon(Icons.chevron_right, color: t.colorScheme.onPrimaryContainer),
+                onTap: () => Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const TimelineScreen())),
+              ),
             ),
             SectionTitle(tr.todaysDiary),
             if (todayDiaries.isEmpty)

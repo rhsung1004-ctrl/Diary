@@ -686,5 +686,49 @@
         "type": "Object"
       }
     }
+  },
+  "linkedGoal": "관련 목표",
+  "linkedGoalNone": "연결 안 함",
+  "goalLogs": "이 목표를 위한 기록 {n}편",
+  "@goalLogs": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "goalLogsEmpty": "일기를 쓸 때 이 목표를 연결하면 과정이 여기에 쌓여요",
+  "goalToCareerTitle": "🎉 목표 달성!",
+  "goalToCareerBody": "\"{title}\"을(를) 커리어에 추가할까요?\n할 일과 연결된 일기 사진으로 초안을 만들어 드려요.",
+  "@goalToCareerBody": {
+    "placeholders": {
+      "title": {
+        "type": "Object"
+      }
+    }
+  },
+  "goalToCareerYes": "커리어에 추가",
+  "careerDraftDone": "완료한 일",
+  "timeline": "나의 타임라인",
+  "timelineSub": "꿈, 목표, 기록, 성과를 한 줄로 돌아보기",
+  "tlEmpty": "기록이 쌓이면 여기에 나의 이야기가 이어져요",
+  "tlBucketDone": "버킷리스트 달성",
+  "tlGoalStart": "목표 시작",
+  "tlGoalDone": "목표 완료",
+  "tlCareer": "{type} 시작",
+  "@tlCareer": {
+    "placeholders": {
+      "type": {
+        "type": "Object"
+      }
+    }
+  },
+  "tlCount": "{n}개의 순간",
+  "@tlCount": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
   }
 }

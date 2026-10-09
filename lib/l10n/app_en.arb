@@ -337,5 +337,21 @@
   "tagRecent": "Your tags",
   "tagBrowse": "Browse by tag",
   "tagNone": "No tagged entries yet",
-  "tagEntries": "#{tag} · {n} entries"
+  "tagEntries": "#{tag} · {n} entries",
+  "linkedGoal": "Related goal",
+  "linkedGoalNone": "None",
+  "goalLogs": "{n} entries for this goal",
+  "goalLogsEmpty": "Link diary entries to this goal to see your journey here",
+  "goalToCareerTitle": "🎉 Goal achieved!",
+  "goalToCareerBody": "Add \"{title}\" to your career?\nWe'll draft it from your tasks and linked diary photos.",
+  "goalToCareerYes": "Add to career",
+  "careerDraftDone": "What I did",
+  "timeline": "My timeline",
+  "timelineSub": "Your dreams, goals, records and achievements in one line",
+  "tlEmpty": "Your story will appear here as you record",
+  "tlBucketDone": "Bucket list achieved",
+  "tlGoalStart": "Goal started",
+  "tlGoalDone": "Goal completed",
+  "tlCareer": "{type} started",
+  "tlCount": "{n} moments"
 }

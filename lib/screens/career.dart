@@ -243,14 +243,15 @@ Future<void> openCareerEditor(BuildContext context, CareerItem? item) async {
 
 class CareerEditor extends StatefulWidget {
   final CareerItem? item;
-  const CareerEditor({super.key, this.item});
+  final CareerItem? draft; // 새 항목을 미리 채워서 열 때 (목표 완료 등)
+  const CareerEditor({super.key, this.item, this.draft});
 
   @override
   State<CareerEditor> createState() => _CareerEditorState();
 }
 
 class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEditor> {
-  late final CareerItem d = widget.item?.copy() ?? CareerItem();
+  late final CareerItem d = widget.item?.copy() ?? widget.draft ?? CareerItem();
   late final _title = TextEditingController(text: d.title);
   late final _org = TextEditingController(text: d.org);
   late final _desc = TextEditingController(text: d.description);

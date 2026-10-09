@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../common.dart';
 import '../models.dart';
 import '../store.dart';
+import 'career.dart';
+import 'diary.dart';
 import '../i18n.dart';
 
 class GoalScreen extends StatefulWidget {
@@ -168,9 +170,37 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
     d
       ..title = _title.text.trim()
       ..note = _note.text.trim();
+    final wasComplete = widget.goal?.isComplete ?? false;
+    if (d.isComplete) {
+      d.completedAt ??= DateTime.now();
+    } else {
+      d.completedAt = null;
+    }
     await AppStore.instance.upsertGoal(d);
     dirty = false;
+    if (!mounted) return;
+    // 방금 완료했으면 커리어 초안을 제안
+    if (!wasComplete && d.isComplete && await _askCareer() && mounted) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => CareerEditor(draft: careerDraftFromGoal(d))));
+      return;
+    }
     if (mounted) Navigator.pop(context);
+  }
+
+  Future<bool> _askCareer() async {
+    final r = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.goalToCareerTitle),
+        content: Text(tr.goalToCareerBody(d.title)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr.later)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr.goalToCareerYes)),
+        ],
+      ),
+    );
+    return r ?? false;
   }
 
   Future<void> _delete() async {
@@ -285,7 +315,43 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
             markDirty();
           },
         ),
+        // 이 목표와 연결된 일기 (과정 기록)
+        if (!isNew)
+          ListenableBuilder(
+            listenable: AppStore.instance,
+            builder: (context, _) {
+              final logs = AppStore.instance.diaries.where((e) => e.goalId == d.id).toList()
+                ..sort((a, b) => b.date.compareTo(a.date));
+              return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                SectionTitle(tr.goalLogs(logs.length)),
+                if (logs.isEmpty)
+                  Text(tr.goalLogsEmpty,
+                      style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant))
+                else
+                  for (final e in logs) DiaryCard(entry: e),
+                const SizedBox(height: 24),
+              ]);
+            },
+          ),
       ]),
     ));
   }
+}
+
+/// 완료한 목표로 커리어 항목 초안 만들기 (할 일 + 연결된 일기 사진)
+CareerItem careerDraftFromGoal(Goal g) {
+  final logs = AppStore.instance.diaries.where((e) => e.goalId == g.id).toList()
+    ..sort((a, b) => a.date.compareTo(b.date));
+  final doneTasks = g.tasks.where((t) => t.done).map((t) => '• ${t.text}').join('\n');
+  return CareerItem(
+    type: '프로젝트',
+    title: g.title,
+    startDate: logs.isNotEmpty ? logs.first.date : g.createdAt,
+    endDate: g.completedAt ?? DateTime.now(),
+    description: [
+      if (g.note.isNotEmpty) g.note,
+      if (doneTasks.isNotEmpty) '${tr.careerDraftDone}\n$doneTasks',
+    ].join('\n\n'),
+    photos: logs.expand((e) => e.photos).take(5).toList(),
+  );
 }
