@@ -50,6 +50,23 @@ class Reminder {
     if (wrote != _wroteToday) reschedule();
   }
 
+  /// 앱을 처음 쓸 때 한 번: 알림 권한을 묻고, 허용하면 매일 밤 9시 일기 알림을 기본으로 켬
+  static Future<void> askOnFirstUse() async {
+    final prefs = AppPrefs.instance;
+    if (prefs.notifAsked) return;
+    var granted = false;
+    try {
+      granted = await requestPermission();
+    } catch (e) {
+      debugPrint('알림 권한 요청 실패: $e');
+    }
+    await prefs.update((p) {
+      p.notifAsked = true;
+      if (granted) p.reminderOn = true;
+    });
+    await reschedule();
+  }
+
   static Future<bool> requestPermission() async {
     final android =
         _plugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();

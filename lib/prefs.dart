@@ -18,6 +18,7 @@ class AppPrefs extends ChangeNotifier {
 
   // 일기 알림
   bool reminderOn = false;
+  bool notifAsked = false; // 처음 한 번 알림 권한을 물어봤는지
   int reminderHour = 21;
   int reminderMinute = 0;
 
@@ -53,6 +54,7 @@ class AppPrefs extends ChangeNotifier {
       reminderOn = m['reminderOn'] as bool? ?? false;
       reminderHour = m['reminderHour'] as int? ?? 21;
       reminderMinute = m['reminderMinute'] as int? ?? 0;
+      notifAsked = m['notifAsked'] as bool? ?? false;
       onboarded = m['onboarded'] as bool? ?? false;
       actionCount = m['actionCount'] as int? ?? 0;
       reviewNextAt = m['reviewNextAt'] as int? ?? 5;
@@ -77,6 +79,7 @@ class AppPrefs extends ChangeNotifier {
       'reminderOn': reminderOn,
       'reminderHour': reminderHour,
       'reminderMinute': reminderMinute,
+      'notifAsked': notifAsked,
       'onboarded': onboarded,
       'actionCount': actionCount,
       'reviewNextAt': reviewNextAt,

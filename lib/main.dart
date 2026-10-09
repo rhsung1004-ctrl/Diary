@@ -119,6 +119,12 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
     // 홈 화면 위젯을 눌러서 들어온 경우
     HomeWidget.initiallyLaunchedFromHomeWidget().then(_openFromWidget);
     _widgetClicks = HomeWidget.widgetClicked.listen(_openFromWidget);
+    // 처음 홈이 열리면 알림 권한을 묻고 매일 일기 알림을 기본으로 켬
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 800), () {
+        if (mounted) AppLock.instance.runExternal(Reminder.askOnFirstUse);
+      });
+    });
     // 일기 알림을 눌러서 들어온 경우
     if (Reminder.launchPayload == 'diary') _openFromWidget(Uri.parse('lifebox://diary/new'));
     _notificationTaps = Reminder.taps.listen((p) {
