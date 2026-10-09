@@ -5,6 +5,7 @@ import '../backup.dart';
 import '../common.dart';
 import '../lock.dart';
 import '../prefs.dart';
+import '../reminder.dart';
 import '../theme.dart';
 
 const _privacyUrl = 'https://github.com/rhsung1004-ctrl/Diary/blob/main/PRIVACY.md';
@@ -19,6 +20,8 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: const [
         SectionTitle('화면'),
         _AppearanceSection(),
+        SectionTitle('알림'),
+        _ReminderSection(),
         SectionTitle('보안'),
         _LockSection(),
         SectionTitle('구글 드라이브 백업'),
@@ -135,6 +138,61 @@ class _AppearanceSection extends StatelessWidget {
             child: Text('모든 글꼴은 SIL 오픈 폰트 라이선스로 무료 사용 가능해요.',
                 style: TextStyle(fontSize: 12)),
           ),
+        ]),
+      ),
+    );
+  }
+}
+
+// ───────────────────────── 알림 ─────────────────────────
+class _ReminderSection extends StatelessWidget {
+  const _ReminderSection();
+
+  Future<void> _toggle(BuildContext context, bool on) async {
+    if (on && !await AppLock.instance.runExternal(Reminder.requestPermission)) {
+      if (context.mounted) toast(context, '알림 권한이 꺼져 있어요. 휴대폰 설정에서 허용해 주세요');
+      return;
+    }
+    await AppPrefs.instance.update((p) => p.reminderOn = on);
+    await Reminder.reschedule();
+  }
+
+  Future<void> _pickTime(BuildContext context) async {
+    final prefs = AppPrefs.instance;
+    final t = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: prefs.reminderHour, minute: prefs.reminderMinute),
+    );
+    if (t == null) return;
+    await prefs.update((p) {
+      p.reminderHour = t.hour;
+      p.reminderMinute = t.minute;
+    });
+    await Reminder.reschedule();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final prefs = AppPrefs.instance;
+    return ListenableBuilder(
+      listenable: prefs,
+      builder: (context, _) => Card(
+        child: Column(children: [
+          SwitchListTile(
+            title: const Text('매일 일기 알림'),
+            subtitle: const Text('그날 일기를 이미 썼으면 울리지 않아요'),
+            value: prefs.reminderOn,
+            onChanged: (v) => _toggle(context, v),
+          ),
+          if (prefs.reminderOn)
+            ListTile(
+              title: const Text('알림 시간'),
+              trailing: Text(
+                TimeOfDay(hour: prefs.reminderHour, minute: prefs.reminderMinute).format(context),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              onTap: () => _pickTime(context),
+            ),
         ]),
       ),
     );

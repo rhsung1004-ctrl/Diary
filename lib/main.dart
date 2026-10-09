@@ -8,6 +8,7 @@ import 'backup.dart';
 import 'home_widget_sync.dart';
 import 'lock.dart';
 import 'prefs.dart';
+import 'reminder.dart';
 import 'screens/bucket.dart';
 import 'screens/career.dart';
 import 'screens/diary.dart';
@@ -24,6 +25,7 @@ Future<void> main() async {
   AppLock.instance.lockOnStart();
   registerFontLicenses();
   HomeWidgetSync.start();
+  await Reminder.init(); // 알림을 눌러 열린 경우를 알아야 해서 먼저
   runApp(const LifeBoxApp());
   // 구글 로그인 복구 → 필요하면 자동 백업 (화면 표시를 막지 않음)
   unawaited(BackupService.instance.init().then((_) => BackupService.instance.autoBackupIfNeeded()));
@@ -82,6 +84,7 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
   int _index = 0;
 
   StreamSubscription<Uri?>? _widgetClicks;
+  StreamSubscription<String?>? _notificationTaps;
 
   @override
   void initState() {
@@ -90,6 +93,11 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
     // 홈 화면 위젯을 눌러서 들어온 경우
     HomeWidget.initiallyLaunchedFromHomeWidget().then(_openFromWidget);
     _widgetClicks = HomeWidget.widgetClicked.listen(_openFromWidget);
+    // 일기 알림을 눌러서 들어온 경우
+    if (Reminder.launchPayload == 'diary') _openFromWidget(Uri.parse('lifebox://diary/new'));
+    _notificationTaps = Reminder.taps.listen((p) {
+      if (p == 'diary') _openFromWidget(Uri.parse('lifebox://diary/new'));
+    });
   }
 
   void _openFromWidget(Uri? uri) {
@@ -112,6 +120,7 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
   @override
   void dispose() {
     _widgetClicks?.cancel();
+    _notificationTaps?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

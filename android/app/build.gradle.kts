@@ -20,6 +20,8 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // flutter_local_notifications(일기 알림)에 필요
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -74,4 +76,5 @@ flutter {
 dependencies {
     // 지문 잠금 화면 테마(Theme.AppCompat)용
     implementation("androidx.appcompat:appcompat:1.7.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

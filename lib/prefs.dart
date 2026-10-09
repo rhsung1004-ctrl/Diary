@@ -15,6 +15,11 @@ class AppPrefs extends ChangeNotifier {
   String font = 'pretendard';
   double textScale = 1.0;
 
+  // 일기 알림
+  bool reminderOn = false;
+  int reminderHour = 21;
+  int reminderMinute = 0;
+
   // 앱 잠금
   String? pinHash; // sha256(salt + pin)
   String? pinSalt;
@@ -38,6 +43,9 @@ class AppPrefs extends ChangeNotifier {
       pinSalt = m['pinSalt'] as String?;
       biometric = m['biometric'] as bool? ?? false;
       lockRecoveryEmail = m['lockRecoveryEmail'] as String?;
+      reminderOn = m['reminderOn'] as bool? ?? false;
+      reminderHour = m['reminderHour'] as int? ?? 21;
+      reminderMinute = m['reminderMinute'] as int? ?? 0;
     } catch (e) {
       debugPrint('설정 읽기 실패: $e');
     }
@@ -55,6 +63,9 @@ class AppPrefs extends ChangeNotifier {
       'pinSalt': pinSalt,
       'biometric': biometric,
       'lockRecoveryEmail': lockRecoveryEmail,
+      'reminderOn': reminderOn,
+      'reminderHour': reminderHour,
+      'reminderMinute': reminderMinute,
     }));
     await tmp.rename(_file.path);
   }

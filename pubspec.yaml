@@ -22,6 +22,10 @@ dependencies:
   pdf: any
   printing: ^5.15.1
   home_widget: any
+  flutter_local_notifications: ^22.3.1
+  timezone: any
+  share_plus: ^13.3.1
+  cross_file: any
 
 dev_dependencies:
   flutter_test:
