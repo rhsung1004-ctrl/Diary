@@ -97,7 +97,7 @@ class _DiaryCalendarState extends State<DiaryCalendar> {
                 Expanded(child: _cell(context, r * 7 + c - lead + 1, daysInMonth, byDay, today)),
             ]),
           const SizedBox(height: 12),
-          Text(tr.calFooter(byDay.values.fold(0, (a, b) => a + b.length)),
+          Text(tr.calFooter(byDay.values.fold<int>(0, (a, b) => a + b.length)),
               textAlign: TextAlign.center,
               style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
         ]);
