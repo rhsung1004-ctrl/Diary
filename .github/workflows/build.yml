@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # 최신 APK를 Releases에 올리기
     steps:
       - uses: actions/checkout@v5
 
@@ -66,3 +68,17 @@ jobs:
         with:
           name: LifeBox-aab-${{ github.run_number }}
           path: build/app/outputs/bundle/release/app-release.aab
+
+      # 누구나 받을 수 있는 고정 링크에 최신 APK 올리기
+      # https://github.com/<저장소>/releases/latest/download/LifeBox.apk
+      - name: Publish latest APK
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp build/app/outputs/flutter-apk/app-release.apk LifeBox.apk
+          NOTES="빌드 #${{ github.run_number }} · $(date -u +%Y-%m-%d)
+          아래 LifeBox.apk 를 받아 설치하세요. (설치 시 '출처를 알 수 없는 앱' 허용 필요)"
+          gh release view apk >/dev/null 2>&1 || gh release create apk --title "LifeBox 최신 버전" --notes "$NOTES" --latest
+          gh release upload apk LifeBox.apk --clobber
+          gh release edit apk --notes "$NOTES" --latest
