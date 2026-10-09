@@ -1,0 +1,61 @@
+# 한 번만 실행: 영어·일본어용 무료 글꼴(SIL OFL 1.1)을 받아 assets/fonts 에 커밋합니다.
+name: Fetch fonts (EN/JA)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fonts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p assets/fonts/licenses tmp
+          GF=https://raw.githubusercontent.com/google/fonts/main/ofl
+          get() { curl -fsSL -o "$2" "$GF/$1"; }
+
+          # 영어: Lora(세리프), Caveat(손글씨) - 가변 글꼴
+          get "lora/Lora%5Bwght%5D.ttf" assets/fonts/Lora.ttf
+          get "lora/OFL.txt" assets/fonts/licenses/Lora-OFL.txt
+          get "caveat/Caveat%5Bwght%5D.ttf" assets/fonts/Caveat.ttf
+          get "caveat/OFL.txt" assets/fonts/licenses/Caveat-OFL.txt
+
+          # 일본어: Zen Maru Gothic(둥근 고딕), Shippori Mincho(명조), Klee One(손글씨)
+          get "zenmarugothic/ZenMaruGothic-Regular.ttf" assets/fonts/ZenMaruGothic-Regular.ttf
+          get "zenmarugothic/ZenMaruGothic-Bold.ttf" assets/fonts/ZenMaruGothic-Bold.ttf
+          get "zenmarugothic/OFL.txt" assets/fonts/licenses/ZenMaruGothic-OFL.txt
+          get "shipporimincho/ShipporiMincho-Regular.ttf" assets/fonts/ShipporiMincho-Regular.ttf
+          get "shipporimincho/ShipporiMincho-Bold.ttf" assets/fonts/ShipporiMincho-Bold.ttf
+          get "shipporimincho/OFL.txt" assets/fonts/licenses/ShipporiMincho-OFL.txt
+          get "kleeone/KleeOne-Regular.ttf" assets/fonts/KleeOne-Regular.ttf
+          get "kleeone/OFL.txt" assets/fonts/licenses/KleeOne-OFL.txt
+
+          # 일본어: Pretendard JP (OFL) - 최신 릴리스에서 TTF 추출
+          URL=$(gh api repos/orioncactus/pretendard/releases/latest --jq '[.assets[] | select(.name | test("^PretendardJP-[0-9.]+\\.zip$"))][0].browser_download_url')
+          echo "Pretendard JP: $URL"
+          curl -fsSL -o tmp/pjp.zip "$URL"
+          unzip -q tmp/pjp.zip -d tmp/pjp
+          for w in Regular Bold; do
+            f=$(find tmp/pjp -name "PretendardJP-$w.ttf" | head -1)
+            if [ -z "$f" ]; then f=$(find tmp/pjp -name "PretendardJP-$w.otf" | head -1); fi
+            test -n "$f"
+            cp "$f" assets/fonts/PretendardJP-$w.${f##*.}
+          done
+          rm -rf tmp
+          ls -la assets/fonts
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/fonts
+          git commit -m "영어·일본어 OFL 글꼴 추가" || echo "변경 없음"
+          git push
