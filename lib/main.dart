@@ -9,6 +9,8 @@ import 'home_widget_sync.dart';
 import 'lock.dart';
 import 'prefs.dart';
 import 'reminder.dart';
+import 'review.dart';
+import 'screens/onboarding.dart';
 import 'screens/bucket.dart';
 import 'screens/career.dart';
 import 'screens/diary.dart';
@@ -25,6 +27,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppStore.instance.load();
   await AppPrefs.instance.load();
+  // 이미 기록이 있는 사용자(업데이트)는 첫 실행 안내를 건너뜀
+  final s = AppStore.instance;
+  if (!AppPrefs.instance.onboarded &&
+      (s.diaries.isNotEmpty || s.buckets.isNotEmpty || s.goals.isNotEmpty || s.careers.isNotEmpty)) {
+    await AppPrefs.instance.update((p) => p.onboarded = true);
+  }
+  ReviewPrompt.start();
   await initializeDateFormatting();
   AppLock.instance.lockOnStart();
   registerFontLicenses();
@@ -38,14 +47,23 @@ Future<void> main() async {
 class LifeBoxApp extends StatelessWidget {
   const LifeBoxApp({super.key});
 
+  static String? _navLang;
+
   @override
   Widget build(BuildContext context) {
     final prefs = AppPrefs.instance;
     return ListenableBuilder(
       listenable: prefs,
-      builder: (context, _) => MaterialApp(
-        // 언어가 바뀌면 화면 전체를 새로 그림
-        key: ValueKey(appLang),
+      builder: (context, _) {
+        // 언어가 바뀌거나 첫 실행 안내가 끝나면 화면 전체를 새로 그림 (Navigator 키도 새로)
+        final appKey = '$appLang/${prefs.onboarded}';
+        if (_navLang != appKey) {
+          _navLang = appKey;
+          ReviewPrompt.navigatorKey = GlobalKey<NavigatorState>();
+        }
+        return MaterialApp(
+        key: ValueKey(appKey),
+        navigatorKey: ReviewPrompt.navigatorKey,
         title: 'LifeBox',
         debugShowCheckedModeBanner: false,
         theme: buildTheme(colorIndex: prefs.colorIndex, brightness: Brightness.light, font: prefs.font),
@@ -74,8 +92,9 @@ class LifeBoxApp extends StatelessWidget {
             ),
           );
         },
-        home: const Shell(),
-      ),
+        home: prefs.onboarded ? const Shell() : const OnboardingScreen(),
+      );
+      },
     );
   }
 }

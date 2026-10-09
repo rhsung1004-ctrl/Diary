@@ -630,5 +630,61 @@
         "type": "Object"
       }
     }
+  },
+  "obSkip": "건너뛰기",
+  "obNext": "다음",
+  "obStart": "시작하기",
+  "obWelcomeTitle": "나를 기록하는 상자, LifeBox",
+  "obWelcomeBody": "버킷리스트, 목표, 일기, 커리어를\n한곳에 모아 두고 돌아보세요.",
+  "obFeaturesTitle": "이런 걸 할 수 있어요",
+  "obF1": "📔 사진과 기분을 담은 일기, 질문 템플릿",
+  "obF2": "🎯 목표와 할 일 진행률, 버킷리스트 달성",
+  "obF3": "💼 포트폴리오 PDF 만들기",
+  "obF4": "📊 통계, 연말 결산 카드, 홈 화면 위젯",
+  "obF5": "🔒 앱 잠금과 구글 드라이브 백업",
+  "obStyleTitle": "나에게 맞게 꾸며요",
+  "obStyleBody": "언어와 테마 색은 설정에서 언제든 바꿀 수 있어요.",
+  "obBackupTitle": "기록을 안전하게",
+  "obBackupBody": "기록은 이 폰에만 저장돼요.\n구글 드라이브를 연결하면 폰을 바꿔도 그대로 옮길 수 있어요.",
+  "obBackupLater": "나중에 설정에서 할게요",
+  "draftFoundTitle": "작성 중이던 일기가 있어요",
+  "draftFoundBody": "{time}에 쓰던 내용을 이어서 쓸까요?",
+  "@draftFoundBody": {
+    "placeholders": {
+      "time": {
+        "type": "Object"
+      }
+    }
+  },
+  "draftContinue": "이어 쓰기",
+  "draftDiscard": "새로 쓰기",
+  "draftSaved": "임시 저장됨",
+  "reviewTitle": "LifeBox가 도움이 되고 있나요?",
+  "reviewBody": "벌써 {n}번이나 기록하셨어요! 🎉\n짧은 리뷰를 남겨 주시면 큰 힘이 돼요.",
+  "@reviewBody": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "reviewYes": "리뷰 남기기",
+  "reviewLater": "다음에",
+  "reviewThanks": "고마워요! 플레이스토어 출시 후에 리뷰를 남길 수 있어요",
+  "tags": "태그",
+  "tagAddHint": "태그 입력 후 엔터 (예: 여행)",
+  "tagRecent": "자주 쓴 태그",
+  "tagBrowse": "태그로 모아보기",
+  "tagNone": "아직 태그를 단 일기가 없어요",
+  "tagEntries": "#{tag} · {n}편",
+  "@tagEntries": {
+    "placeholders": {
+      "tag": {
+        "type": "Object"
+      },
+      "n": {
+        "type": "Object"
+      }
+    }
   }
 }

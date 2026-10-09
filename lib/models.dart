@@ -139,6 +139,7 @@ class DiaryEntry {
   String body;
   String mood;
   List<String> photos;
+  List<String> tags;
   DateTime createdAt;
 
   DiaryEntry({
@@ -148,10 +149,12 @@ class DiaryEntry {
     this.body = '',
     this.mood = '',
     List<String>? photos,
+    List<String>? tags,
     DateTime? createdAt,
   })  : id = id ?? newId(),
         date = date ?? DateTime.now(),
         photos = photos ?? <String>[],
+        tags = tags ?? <String>[],
         createdAt = createdAt ?? DateTime.now();
 
   DiaryEntry copy() => DiaryEntry.fromJson(toJson());
@@ -163,6 +166,7 @@ class DiaryEntry {
         'body': body,
         'mood': mood,
         'photos': List<String>.from(photos),
+        'tags': List<String>.from(tags),
         'createdAt': createdAt.toIso8601String(),
       };
 
@@ -173,6 +177,7 @@ class DiaryEntry {
         body: j['body'] as String? ?? '',
         mood: j['mood'] as String? ?? '',
         photos: _strings(j['photos']),
+        tags: _strings(j['tags']),
         createdAt: _date(j['createdAt']),
       );
 }

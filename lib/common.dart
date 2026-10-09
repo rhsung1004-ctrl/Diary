@@ -152,6 +152,9 @@ mixin DirtyGuard<T extends StatefulWidget> on State<T> {
     if (!dirty) setState(() => dirty = true);
   }
 
+  /// "저장하지 않고 나가기"를 골랐을 때 (필요하면 덮어쓰기)
+  void onDiscard() {}
+
   Widget guard(Widget child) => PopScope<Object?>(
         canPop: !dirty,
         onPopInvokedWithResult: (didPop, _) async {
@@ -159,6 +162,7 @@ mixin DirtyGuard<T extends StatefulWidget> on State<T> {
           final leave = await confirmDialog(context, tr.leaveTitle, tr.leaveBody, tr.leave);
           if (leave && mounted) {
             dirty = false;
+            onDiscard();
             Navigator.of(context).pop();
           }
         },

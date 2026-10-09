@@ -21,6 +21,11 @@ class AppPrefs extends ChangeNotifier {
   int reminderHour = 21;
   int reminderMinute = 0;
 
+  // 첫 실행 안내 / 리뷰 요청
+  bool onboarded = false;
+  int actionCount = 0; // 기록 저장 횟수
+  int reviewNextAt = 5; // 이 횟수가 되면 리뷰 요청 (0 = 다시 안 물어봄)
+
   // 앱 잠금
   String? pinHash; // sha256(salt + pin)
   String? pinSalt;
@@ -48,6 +53,9 @@ class AppPrefs extends ChangeNotifier {
       reminderOn = m['reminderOn'] as bool? ?? false;
       reminderHour = m['reminderHour'] as int? ?? 21;
       reminderMinute = m['reminderMinute'] as int? ?? 0;
+      onboarded = m['onboarded'] as bool? ?? false;
+      actionCount = m['actionCount'] as int? ?? 0;
+      reviewNextAt = m['reviewNextAt'] as int? ?? 5;
     } catch (e) {
       debugPrint('설정 읽기 실패: $e');
     }
@@ -69,6 +77,9 @@ class AppPrefs extends ChangeNotifier {
       'reminderOn': reminderOn,
       'reminderHour': reminderHour,
       'reminderMinute': reminderMinute,
+      'onboarded': onboarded,
+      'actionCount': actionCount,
+      'reviewNextAt': reviewNextAt,
     }));
     await tmp.rename(_file.path);
   }

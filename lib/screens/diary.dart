@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../common.dart';
@@ -25,6 +27,11 @@ class _DiaryScreenState extends State<DiaryScreen> {
       appBar: AppBar(
         title: Text(tr.diary),
         actions: [
+          IconButton(
+            tooltip: tr.tagBrowse,
+            icon: const Icon(Icons.tag),
+            onPressed: () => showTagBrowser(context),
+          ),
           IconButton(
             tooltip: _calendar ? tr.viewList : tr.viewCalendar,
             icon: Icon(_calendar ? Icons.view_agenda_outlined : Icons.calendar_month_outlined),
@@ -115,6 +122,13 @@ class DiaryCard extends StatelessWidget {
                       style: t.textTheme.bodyMedium
                           ?.copyWith(color: t.colorScheme.onSurfaceVariant)),
                 ],
+                if (e.tags.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(e.tags.map((x) => '#$x').join(' '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: t.textTheme.labelMedium?.copyWith(color: t.colorScheme.primary)),
+                ],
               ]),
             ),
             if (e.photos.isNotEmpty) ...[
@@ -168,6 +182,17 @@ class DiaryView extends StatelessWidget {
             PhotoGallery(e.photos),
             if (e.photos.isNotEmpty) const SizedBox(height: 16),
             SelectableText(e.body, style: t.textTheme.bodyLarge?.copyWith(height: 1.7)),
+            if (e.tags.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Wrap(spacing: 6, runSpacing: 6, children: [
+                for (final tag in e.tags)
+                  ActionChip(
+                    label: Text('#$tag'),
+                    onPressed: () => Navigator.push(
+                        context, MaterialPageRoute(builder: (_) => TagEntriesScreen(tag: tag))),
+                  ),
+              ]),
+            ],
           ]),
         );
       },
@@ -196,16 +221,113 @@ class DiaryEditor extends StatefulWidget {
   State<DiaryEditor> createState() => _DiaryEditorState();
 }
 
-class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> {
+class _DiaryEditorState extends State<DiaryEditor>
+    with DirtyGuard<DiaryEditor>, WidgetsBindingObserver {
   late final DiaryEntry d = widget.entry?.copy() ?? widget.draft ?? DiaryEntry(date: widget.date);
   late final _title = TextEditingController(text: d.title);
   late final _body = TextEditingController(text: d.body);
+  final _tag = TextEditingController();
   bool get isNew => widget.entry == null;
+
+  // ───── 임시 저장 ─────
+  String get _draftKey => widget.entry?.id ?? 'new';
+  Timer? _draftTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    final draft = AppStore.instance.drafts[_draftKey];
+    if (draft != null && widget.draft == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _offerDraft(draft));
+    }
+  }
+
+  Future<void> _offerDraft(DiaryDraft draft) async {
+    final resume = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.draftFoundTitle),
+        content: Text(tr.draftFoundBody(fmtDateTime(draft.savedAt))),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(tr.draftDiscard)),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(tr.draftContinue)),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    if (resume == true) {
+      final e = draft.entry;
+      setState(() {
+        d
+          ..date = e.date
+          ..mood = e.mood
+          ..photos = List.of(e.photos)
+          ..tags = List.of(e.tags);
+        _title.text = e.title;
+        _body.text = e.body;
+      });
+      markDirty();
+    } else {
+      await AppStore.instance.clearDraft(_draftKey);
+    }
+  }
+
+  @override
+  void markDirty() {
+    super.markDirty();
+    _draftTimer?.cancel();
+    _draftTimer = Timer(const Duration(milliseconds: 1500), _saveDraft);
+  }
+
+  Future<void> _saveDraft() async {
+    if (!dirty) return;
+    d
+      ..title = _title.text
+      ..body = _body.text;
+    await AppStore.instance.saveDraft(_draftKey, d);
+  }
+
+  @override
+  void onDiscard() => AppStore.instance.clearDraft(_draftKey);
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // 전화가 오거나 앱을 나갈 때 바로 임시 저장
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      _draftTimer?.cancel();
+      _saveDraft();
+    }
+  }
+
+  // ───── 태그 ─────
+  void _addTag([String? raw]) {
+    final parts = (raw ?? _tag.text)
+        .split(RegExp(r'[\s,#]+'))
+        .map((t) => t.trim())
+        .where((t) => t.isNotEmpty && t.length <= 20);
+    var changed = false;
+    for (final t in parts) {
+      if (!d.tags.contains(t)) {
+        d.tags.add(t);
+        changed = true;
+      }
+    }
+    _tag.clear();
+    if (changed) {
+      setState(() {});
+      markDirty();
+    }
+  }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _draftTimer?.cancel();
     _title.dispose();
     _body.dispose();
+    _tag.dispose();
     super.dispose();
   }
 
@@ -217,14 +339,19 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
       toast(context, tr.diaryNeedContent);
       return;
     }
+    _addTag(); // 입력칸에 남은 태그도 저장
+    _draftTimer?.cancel();
     await AppStore.instance.upsertDiary(d);
+    await AppStore.instance.clearDraft(_draftKey);
     dirty = false;
     if (mounted) Navigator.pop(context, false);
   }
 
   Future<void> _delete() async {
     if (!await confirmDialog(context, tr.diaryDeleteTitle, tr.cannotUndo, tr.delete)) return;
+    _draftTimer?.cancel();
     await AppStore.instance.removeDiary(d.id);
+    await AppStore.instance.clearDraft(_draftKey);
     dirty = false;
     if (mounted) Navigator.pop(context, true);
   }
@@ -295,9 +422,103 @@ class _DiaryEditorState extends State<DiaryEditor> with DirtyGuard<DiaryEditor> 
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 16),
+        Text(tr.tags, style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 6),
+        if (d.tags.isNotEmpty)
+          Wrap(spacing: 6, runSpacing: 6, children: [
+            for (final t in d.tags)
+              InputChip(
+                label: Text('#$t'),
+                onDeleted: () {
+                  setState(() => d.tags.remove(t));
+                  markDirty();
+                },
+              ),
+          ]),
+        TextField(
+          controller: _tag,
+          decoration: InputDecoration(hintText: tr.tagAddHint, isDense: true, prefixText: '# '),
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _addTag(),
+        ),
+        Builder(builder: (context) {
+          final suggestions = AppStore.instance.diaryTagCounts
+              .map((e) => e.key)
+              .where((t) => !d.tags.contains(t))
+              .take(10)
+              .toList();
+          if (suggestions.isEmpty) return const SizedBox(height: 8);
+          return Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final t in suggestions)
+                ActionChip(label: Text('#$t'), onPressed: () => _addTag(t)),
+            ]),
+          );
+        }),
+        const SizedBox(height: 8),
         PhotoEditor(photos: d.photos, onChanged: markDirty),
         const SizedBox(height: 24),
       ]),
     ));
+  }
+}
+
+
+/// 태그 목록 (많이 쓴 순) → 고르면 그 태그의 일기 모아보기
+void showTagBrowser(BuildContext context) {
+  final tags = AppStore.instance.diaryTagCounts;
+  showModalBottomSheet<void>(
+    context: context,
+    showDragHandle: true,
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(tr.tagBrowse, style: Theme.of(ctx).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          if (tags.isEmpty)
+            Text(tr.tagNone)
+          else
+            Wrap(spacing: 8, runSpacing: 8, children: [
+              for (final e in tags)
+                ActionChip(
+                  label: Text('#${e.key}  ${e.value}'),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.push(
+                        context, MaterialPageRoute(builder: (_) => TagEntriesScreen(tag: e.key)));
+                  },
+                ),
+            ]),
+        ]),
+      ),
+    ),
+  );
+}
+
+class TagEntriesScreen extends StatelessWidget {
+  final String tag;
+  const TagEntriesScreen({super.key, required this.tag});
+
+  @override
+  Widget build(BuildContext context) {
+    final store = AppStore.instance;
+    return ListenableBuilder(
+      listenable: store,
+      builder: (context, _) {
+        final list = store.diaries.where((e) => e.tags.contains(tag)).toList()
+          ..sort((a, b) => b.date.compareTo(a.date));
+        return Scaffold(
+          appBar: AppBar(title: Text(tr.tagEntries(tag, list.length))),
+          body: list.isEmpty
+              ? EmptyState(icon: Icons.tag, text: tr.tagNone)
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                  children: [for (final e in list) DiaryCard(entry: e)],
+                ),
+        );
+      },
+    );
   }
 }

@@ -22,6 +22,12 @@ class AppStore extends ChangeNotifier {
   List<CareerItem> careers = [];
   Profile profile = Profile();
 
+  /// 작성 중인 일기 (key: 'new' 또는 수정 중인 일기 id)
+  final Map<String, DiaryDraft> drafts = {};
+
+  /// 사용자가 기록을 저장할 때마다 호출 (리뷰 요청 횟수 세기)
+  VoidCallback? onUserAction;
+
   File get _dataFile => File('${_dir.path}/data.json');
 
   Future<void> load() async {
@@ -41,6 +47,7 @@ class AppStore extends ChangeNotifier {
         await _dataFile.copy('${_dir.path}/data.broken-$ts.json');
       }
     }
+    await _loadDrafts();
     if (loadedOk) await _cleanUnusedPhotos();
   }
 
@@ -75,7 +82,56 @@ class AppStore extends ChangeNotifier {
         ...diaries.expand((e) => e.photos),
         ...careers.expand((e) => e.photos),
         if (profile.photo.isNotEmpty) profile.photo,
+        ...drafts.values.expand((d) => d.entry.photos), // 임시 저장 사진도 지우지 않음
       };
+
+  /// 일기 태그별 개수 (많이 쓴 순)
+  List<MapEntry<String, int>> get diaryTagCounts {
+    final m = <String, int>{};
+    for (final e in diaries) {
+      for (final t in e.tags) {
+        m[t] = (m[t] ?? 0) + 1;
+      }
+    }
+    return m.entries.toList()..sort((a, b) => b.value.compareTo(a.value));
+  }
+
+  // ───── 일기 임시 저장 ─────
+  File get _draftFile => File('${_dir.path}/drafts.json');
+
+  Future<void> _loadDrafts() async {
+    try {
+      if (!await _draftFile.exists()) return;
+      final m = jsonDecode(await _draftFile.readAsString()) as Map<String, dynamic>;
+      m.forEach((k, v) {
+        final mm = Map<String, dynamic>.from(v as Map);
+        drafts[k] = DiaryDraft(
+          DiaryEntry.fromJson(Map<String, dynamic>.from(mm['entry'] as Map)),
+          DateTime.tryParse(mm['savedAt'] as String? ?? '') ?? DateTime.now(),
+        );
+      });
+    } catch (e) {
+      debugPrint('임시 저장 읽기 실패: $e');
+    }
+  }
+
+  Future<void> _saveDrafts() async {
+    final tmp = File('${_draftFile.path}.tmp');
+    await tmp.writeAsString(jsonEncode({
+      for (final e in drafts.entries)
+        e.key: {'entry': e.value.entry.toJson(), 'savedAt': e.value.savedAt.toIso8601String()},
+    }));
+    await tmp.rename(_draftFile.path);
+  }
+
+  Future<void> saveDraft(String key, DiaryEntry entry) async {
+    drafts[key] = DiaryDraft(entry.copy(), DateTime.now());
+    await _saveDrafts();
+  }
+
+  Future<void> clearDraft(String key) async {
+    if (drafts.remove(key) != null) await _saveDrafts();
+  }
 
   /// 마지막으로 기록이 바뀐 시각 (자동 백업 판단용)
   Future<DateTime?> dataModifiedAt() async =>
@@ -132,6 +188,7 @@ class AppStore extends ChangeNotifier {
       list.insert(0, item);
     }
     await save();
+    onUserAction?.call();
   }
 
   Future<void> _remove<T>(List<T> list, String id, String Function(T) idOf) async {
@@ -155,4 +212,10 @@ class AppStore extends ChangeNotifier {
   }
 
   Future<void> removeCareer(String id) => _remove(careers, id, (CareerItem e) => e.id);
+}
+
+class DiaryDraft {
+  final DiaryEntry entry;
+  final DateTime savedAt;
+  DiaryDraft(this.entry, this.savedAt);
 }

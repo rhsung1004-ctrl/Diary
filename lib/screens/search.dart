@@ -44,7 +44,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (_q.isNotEmpty) {
       final diaries = store.diaries
-          .where((e) => _has(e.title) || _has(e.body))
+          .where((e) => _has(e.title) || _has(e.body) || e.tags.any(_has))
           .toList()
         ..sort((a, b) => b.date.compareTo(a.date));
       final buckets = store.buckets
@@ -117,7 +117,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     },
                   ),
           ),
-          onChanged: (v) => setState(() => _q = v.trim().toLowerCase()),
+          onChanged: (v) => setState(() => _q = v.trim().toLowerCase().replaceFirst('#', '')),
         ),
       ),
       body: ListenableBuilder(
