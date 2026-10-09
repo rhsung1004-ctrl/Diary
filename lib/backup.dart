@@ -94,6 +94,16 @@ class BackupService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// 잠금 해제용: 구글 로그인 후 이메일 반환
+  Future<String?> verifyGoogleAccount() async {
+    await _ready.future;
+    if (!configured) throw BackupException('구글 연동 설정이 없어요');
+    final acc = await GoogleSignIn.instance.authenticate();
+    account = acc;
+    notifyListeners();
+    return acc.email;
+  }
+
   Future<void> disconnect() async {
     await _ready.future;
     if (configured) await GoogleSignIn.instance.disconnect();
@@ -226,6 +236,8 @@ class BackupService extends ChangeNotifier {
             for (final item in map[key] as List)
               if (item is Map && item['photos'] is List)
                 ...(item['photos'] as List).map((p) => p.toString()),
+        if (map['profile'] is Map && ((map['profile'] as Map)['photo'] ?? '') != '')
+          (map['profile'] as Map)['photo'].toString(),
       };
 
       final missing = <String>[];

@@ -20,6 +20,7 @@ class AppStore extends ChangeNotifier {
   List<Goal> goals = [];
   List<DiaryEntry> diaries = [];
   List<CareerItem> careers = [];
+  Profile profile = Profile();
 
   File get _dataFile => File('${_dir.path}/data.json');
 
@@ -55,6 +56,7 @@ class AppStore extends ChangeNotifier {
         'goals': goals.map((e) => e.toJson()).toList(),
         'diaries': diaries.map((e) => e.toJson()).toList(),
         'careers': careers.map((e) => e.toJson()).toList(),
+        'profile': profile.toJson(),
       };
 
   void applyMap(Map<String, dynamic> m) {
@@ -62,6 +64,9 @@ class AppStore extends ChangeNotifier {
     goals = _list(m['goals'], Goal.fromJson);
     diaries = _list(m['diaries'], DiaryEntry.fromJson);
     careers = _list(m['careers'], CareerItem.fromJson);
+    profile = m['profile'] is Map
+        ? Profile.fromJson(Map<String, dynamic>.from(m['profile'] as Map))
+        : Profile();
   }
 
   /// 모든 기록이 쓰고 있는 사진 파일 이름
@@ -69,6 +74,7 @@ class AppStore extends ChangeNotifier {
         ...buckets.expand((e) => e.photos),
         ...diaries.expand((e) => e.photos),
         ...careers.expand((e) => e.photos),
+        if (profile.photo.isNotEmpty) profile.photo,
       };
 
   /// 마지막으로 기록이 바뀐 시각 (자동 백업 판단용)
@@ -143,5 +149,10 @@ class AppStore extends ChangeNotifier {
   Future<void> removeDiary(String id) => _remove(diaries, id, (DiaryEntry e) => e.id);
 
   Future<void> upsertCareer(CareerItem v) => _upsert(careers, v, (e) => e.id);
+  Future<void> saveProfile(Profile p) async {
+    profile = p;
+    await save();
+  }
+
   Future<void> removeCareer(String id) => _remove(careers, id, (CareerItem e) => e.id);
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'common.dart';
+import 'lock.dart';
 import 'store.dart';
 
 /// 정사각형 썸네일
@@ -49,14 +50,14 @@ class _PhotoEditorState extends State<PhotoEditor> {
 
   Future<void> _add(ImageSource src) async {
     try {
-      List<XFile> files;
-      if (src == ImageSource.gallery) {
-        files = await _picker.pickMultiImage(imageQuality: 85, maxWidth: 2048, maxHeight: 2048);
-      } else {
+      final files = await AppLock.instance.runExternal<List<XFile>>(() async {
+        if (src == ImageSource.gallery) {
+          return _picker.pickMultiImage(imageQuality: 85, maxWidth: 2048, maxHeight: 2048);
+        }
         final f = await _picker.pickImage(
             source: src, imageQuality: 85, maxWidth: 2048, maxHeight: 2048);
-        files = f == null ? <XFile>[] : [f];
-      }
+        return f == null ? <XFile>[] : [f];
+      });
       if (files.isEmpty) return;
       setState(() => _busy = true);
       for (final f in files) {

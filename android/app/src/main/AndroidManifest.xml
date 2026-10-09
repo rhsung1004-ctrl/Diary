@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- 구글 드라이브 백업 -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- 앱 잠금(지문·얼굴) -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
     <application
         android:label="LifeBox"
         android:name="${applicationName}"

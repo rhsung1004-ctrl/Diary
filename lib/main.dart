@@ -4,16 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'backup.dart';
+import 'lock.dart';
+import 'prefs.dart';
 import 'screens/bucket.dart';
 import 'screens/career.dart';
 import 'screens/diary.dart';
 import 'screens/goals.dart';
 import 'screens/home.dart';
 import 'store.dart';
+import 'theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppStore.instance.load();
+  await AppPrefs.instance.load();
+  AppLock.instance.lockOnStart();
+  registerFontLicenses();
   runApp(const LifeBoxApp());
   // 구글 로그인 복구 → 필요하면 자동 백업 (화면 표시를 막지 않음)
   unawaited(BackupService.instance.init().then((_) => BackupService.instance.autoBackupIfNeeded()));
@@ -22,27 +28,41 @@ Future<void> main() async {
 class LifeBoxApp extends StatelessWidget {
   const LifeBoxApp({super.key});
 
-  ThemeData _theme(Brightness b) => ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF3D7A6E),
-        brightness: b,
-      );
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'LifeBox',
-      debugShowCheckedModeBanner: false,
-      theme: _theme(Brightness.light),
-      darkTheme: _theme(Brightness.dark),
-      locale: const Locale('ko'),
-      supportedLocales: const [Locale('ko'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: const Shell(),
+    final prefs = AppPrefs.instance;
+    return ListenableBuilder(
+      listenable: prefs,
+      builder: (context, _) => MaterialApp(
+        title: 'LifeBox',
+        debugShowCheckedModeBanner: false,
+        theme: buildTheme(colorIndex: prefs.colorIndex, brightness: Brightness.light, font: prefs.font),
+        darkTheme: buildTheme(colorIndex: prefs.colorIndex, brightness: Brightness.dark, font: prefs.font),
+        themeMode: prefs.themeMode,
+        locale: const Locale('ko'),
+        supportedLocales: const [Locale('ko'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        builder: (context, child) {
+          // 글자 크기: 기기 설정 × 앱 설정 × 글꼴 보정
+          final mq = MediaQuery.of(context);
+          final factor = prefs.textScale * fontByKey(prefs.font).sizeFactor;
+          return MediaQuery(
+            data: mq.copyWith(textScaler: TextScaler.linear(mq.textScaler.scale(1) * factor)),
+            child: ListenableBuilder(
+              listenable: AppLock.instance,
+              builder: (context, _) => Stack(children: [
+                child ?? const SizedBox.shrink(),
+                if (AppLock.instance.locked) const Positioned.fill(child: LockOverlay()),
+              ]),
+            ),
+          );
+        },
+        home: const Shell(),
+      ),
     );
   }
 }
@@ -71,6 +91,7 @@ class _ShellState extends State<Shell> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    AppLock.instance.onLifecycle(state);
     // 앱을 나갈 때 자동 백업
     if (state == AppLifecycleState.paused) {
       BackupService.instance.autoBackupIfNeeded();

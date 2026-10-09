@@ -70,3 +70,8 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // 지문 잠금 화면 테마(Theme.AppCompat)용
+    implementation("androidx.appcompat:appcompat:1.7.0")
+}

@@ -17,6 +17,10 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^3.0.0
   googleapis: any
   googleapis_auth: any
+  local_auth: ^3.0.2
+  crypto: any
+  pdf: any
+  printing: ^5.15.1
 
 dev_dependencies:
   flutter_test:
@@ -32,3 +36,23 @@ flutter_launcher_icons:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/fonts/licenses/
+  # 모두 SIL Open Font License 1.1 (assets/fonts/licenses 참고)
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.ttf
+        - asset: assets/fonts/Pretendard-Bold.ttf
+          weight: 700
+    - family: GowunDodum
+      fonts:
+        - asset: assets/fonts/GowunDodum-Regular.ttf
+    - family: GowunBatang
+      fonts:
+        - asset: assets/fonts/GowunBatang-Regular.ttf
+        - asset: assets/fonts/GowunBatang-Bold.ttf
+          weight: 700
+    - family: NanumPenScript
+      fonts:
+        - asset: assets/fonts/NanumPenScript-Regular.ttf

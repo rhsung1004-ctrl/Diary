@@ -244,3 +244,48 @@ class CareerItem {
         createdAt: _date(j['createdAt']),
       );
 }
+
+// ───────────────────────── 내 프로필 (포트폴리오 표지) ─────────────────────────
+class Profile {
+  String name;
+  String headline; // 한 줄 소개
+  String email;
+  String phone;
+  String link;
+  String intro; // 자기소개
+  String photo; // 사진 파일 이름 ('' = 없음)
+
+  Profile({
+    this.name = '',
+    this.headline = '',
+    this.email = '',
+    this.phone = '',
+    this.link = '',
+    this.intro = '',
+    this.photo = '',
+  });
+
+  bool get isEmpty => name.isEmpty && headline.isEmpty && intro.isEmpty;
+
+  Profile copy() => Profile.fromJson(toJson());
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'headline': headline,
+        'email': email,
+        'phone': phone,
+        'link': link,
+        'intro': intro,
+        'photo': photo,
+      };
+
+  factory Profile.fromJson(Map<String, dynamic> j) => Profile(
+        name: j['name'] as String? ?? '',
+        headline: j['headline'] as String? ?? '',
+        email: j['email'] as String? ?? '',
+        phone: j['phone'] as String? ?? '',
+        link: j['link'] as String? ?? '',
+        intro: j['intro'] as String? ?? '',
+        photo: j['photo'] as String? ?? '',
+      );
+}
