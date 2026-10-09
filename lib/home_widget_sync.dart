@@ -7,6 +7,7 @@ import 'package:home_widget/home_widget.dart';
 import 'common.dart';
 import 'prefs.dart';
 import 'store.dart';
+import 'theme.dart';
 import 'i18n.dart';
 
 /// 안드로이드 홈 화면 위젯에 보여줄 값을 넘겨줌.
@@ -38,7 +39,6 @@ class HomeWidgetSync {
         'saved_day': '${today.year}-${two(today.month)}-${two(today.day)}',
         'diary_done': days.contains(today).toString(),
         'streak': diaryStreak(days, today).toString(),
-        'hidden': AppPrefs.instance.lockEnabled.toString(), // 잠금 중엔 목표 제목 숨김
         'goal_count': goals.length.toString(),
         // 위젯 문구도 앱 언어로 ({n}은 위젯이 채움)
         'lang': appLang,
@@ -47,8 +47,19 @@ class HomeWidgetSync {
         't_streak': tr.wStreak('{n}'),
         't_write': tr.wWrite,
         't_no_goals': tr.wNoGoals,
-        't_locked': tr.wLocked('{n}'),
+        // 위젯 색은 앱 테마(테마 색 + 다크 모드 설정)를 따라감
+        'mode': AppPrefs.instance.themeMode.name,
       };
+      final seed = themeColors[AppPrefs.instance.colorIndex.clamp(0, themeColors.length - 1)].seed;
+      for (final b in Brightness.values) {
+        final cs = ColorScheme.fromSeed(seedColor: seed, brightness: b);
+        final p = b == Brightness.dark ? 'd' : 'l';
+        data['c_${p}_bg'] = cs.surfaceContainer.toARGB32().toString();
+        data['c_${p}_text'] = cs.onSurface.toARGB32().toString();
+        data['c_${p}_sub'] = cs.onSurfaceVariant.toARGB32().toString();
+        data['c_${p}_accent'] = cs.primary.toARGB32().toString();
+        data['c_${p}_track'] = cs.surfaceContainerHighest.toARGB32().toString();
+      }
       for (var i = 0; i < 2; i++) {
         final g = i < goals.length ? goals[i] : null;
         data['goal${i + 1}_title'] = g?.title ?? '';
