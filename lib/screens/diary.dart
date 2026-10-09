@@ -423,6 +423,18 @@ class _DiaryEditorState extends State<DiaryEditor>
           onChanged: (_) => markDirty(),
         ),
         const SizedBox(height: 16),
+        // 자주 안 쓰는 항목은 접어 둠 (태그 · 관련 목표)
+        Theme(
+          data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+          child: ExpansionTile(
+            tilePadding: EdgeInsets.zero,
+            childrenPadding: const EdgeInsets.only(bottom: 8),
+            initiallyExpanded: d.tags.isNotEmpty || d.goalId != null,
+            leading: const Icon(Icons.tag),
+            title: Text(tr.diaryMore),
+            subtitle: d.tags.isEmpty ? null : Text(d.tags.map((t) => '#$t').join(' '), maxLines: 1),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            children: [
         // 관련 목표 (목표 화면에 이 일기가 모여요)
         Builder(builder: (context) {
           final goals = [
@@ -486,6 +498,9 @@ class _DiaryEditorState extends State<DiaryEditor>
             ]),
           );
         }),
+            ],
+          ),
+        ),
         const SizedBox(height: 8),
         PhotoEditor(photos: d.photos, onChanged: markDirty),
         const SizedBox(height: 24),

@@ -353,5 +353,13 @@
   "tlGoalStart": "Goal started",
   "tlGoalDone": "Goal completed",
   "tlCareer": "{type} started",
-  "tlCount": "{n} moments"
+  "tlCount": "{n} moments",
+  "homeGreeting": "Ready to record today?",
+  "reflect": "Look back",
+  "diaryMore": "Tags · Related goal",
+  "setDisplaySub": "Language, theme, dark mode, font",
+  "setNotifSub": "Daily diary reminder",
+  "setSecuritySub": "App lock, fingerprint",
+  "setBackupSub": "Keep records in Google Drive",
+  "setAboutSub": "Privacy policy, licenses"
 }

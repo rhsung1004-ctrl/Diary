@@ -19,20 +19,36 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(tr.settings)),
-      body: ListView(padding: const EdgeInsets.fromLTRB(16, 0, 16, 32), children: [
-        SectionTitle(tr.display),
-        const _AppearanceSection(),
-        SectionTitle(tr.notifications),
-        const _ReminderSection(),
-        SectionTitle(tr.security),
-        const _LockSection(),
-        SectionTitle(tr.driveBackup),
-        const _BackupSection(),
-        SectionTitle(tr.about),
-        const _AboutSection(),
+      // 메뉴만 짧게 보여주고, 누르면 각 설정 화면으로
+      body: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 32), children: [
+        Card(
+          child: Column(children: [
+            _menu(context, Icons.palette_outlined, tr.display, tr.setDisplaySub, const _AppearanceSection()),
+            _menu(context, Icons.notifications_outlined, tr.notifications, tr.setNotifSub, const _ReminderSection()),
+            _menu(context, Icons.lock_outline, tr.security, tr.setSecuritySub, const _LockSection()),
+            _menu(context, Icons.cloud_outlined, tr.driveBackup, tr.setBackupSub, const _BackupSection()),
+            _menu(context, Icons.info_outline, tr.about, tr.setAboutSub, const _AboutSection()),
+          ]),
+        ),
       ]),
     );
   }
+
+  Widget _menu(BuildContext context, IconData icon, String title, String sub, Widget section) => ListTile(
+        leading: Icon(icon),
+        title: Text(title),
+        subtitle: Text(sub),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => Scaffold(
+              appBar: AppBar(title: Text(title)),
+              body: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 32), children: [section]),
+            ),
+          ),
+        ),
+      );
 }
 
 // ───────────────────────── 화면 ─────────────────────────

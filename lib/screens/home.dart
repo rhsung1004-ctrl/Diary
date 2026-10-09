@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../common.dart';
 import '../store.dart';
-import 'bucket.dart';
 import 'diary.dart';
 import 'goals.dart';
 import 'settings.dart';
@@ -31,12 +30,6 @@ class HomeScreen extends StatelessWidget {
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const SearchScreen())),
           ),
           IconButton(
-            icon: const Icon(Icons.insights_outlined),
-            tooltip: tr.stats,
-            onPressed: () =>
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsScreen())),
-          ),
-          IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: tr.settings,
             onPressed: () => Navigator.push(
@@ -48,7 +41,6 @@ class HomeScreen extends StatelessWidget {
         listenable: store,
         builder: (context, _) {
           final now = DateTime.now();
-          final bucketDone = store.buckets.where((b) => b.done).length;
           final activeGoals = store.goals.where((g) => !g.isComplete).toList()
             ..sort((a, b) => (a.dueDate ?? DateTime(9999)).compareTo(b.dueDate ?? DateTime(9999)));
           final todayDiaries = store.diaries.where((e) => sameDay(e.date, now)).toList();
@@ -56,63 +48,52 @@ class HomeScreen extends StatelessWidget {
               .where((e) => e.date.month == now.month && e.date.day == now.day && e.date.year < now.year)
               .toList()
             ..sort((a, b) => b.date.compareTo(a.date));
-          // 12월·1월엔 결산 카드 안내
+          // 12월·1월엔 결산 카드를 강조
           final reviewYear = now.month == 12 ? now.year : (now.month == 1 ? now.year - 1 : null);
-          final recentDone = store.buckets.where((b) => b.done && b.doneAt != null).toList()
-            ..sort((a, b) => b.doneAt!.compareTo(a.doneAt!));
 
           return ListView(padding: const EdgeInsets.fromLTRB(16, 4, 16, 32), children: [
             Text(fmtDateW(now),
                 style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onSurfaceVariant)),
-            const SizedBox(height: 16),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              childAspectRatio: 1.9,
-              mainAxisSpacing: 10,
-              crossAxisSpacing: 10,
-              children: [
-                _StatCard(Icons.flag_outlined, tr.bucketList, '$bucketDone / ${store.buckets.length}',
-                    () => onNavigate(1)),
-                _StatCard(Icons.track_changes, tr.activeGoals, tr.countItems(activeGoals.length),
-                    () => onNavigate(2)),
-                _StatCard(Icons.menu_book_outlined, tr.diary, tr.countEntries(store.diaries.length),
-                    () => onNavigate(3)),
-                _StatCard(Icons.work_outline, tr.tabCareer, tr.countItems(store.careers.length),
-                    () => onNavigate(4)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Card(
-              elevation: 0,
-              margin: EdgeInsets.zero,
-              color: t.colorScheme.primaryContainer,
-              child: ListTile(
-                leading: Icon(Icons.timeline, color: t.colorScheme.onPrimaryContainer),
-                title: Text(tr.timeline,
-                    style: TextStyle(fontWeight: FontWeight.bold, color: t.colorScheme.onPrimaryContainer)),
-                subtitle: Text(tr.timelineSub,
-                    style: TextStyle(color: t.colorScheme.onPrimaryContainer.withValues(alpha: 0.8))),
-                trailing: Icon(Icons.chevron_right, color: t.colorScheme.onPrimaryContainer),
-                onTap: () => Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const TimelineScreen())),
-              ),
-            ),
+            const SizedBox(height: 2),
+            Text(tr.homeGreeting,
+                style: t.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+
+            // 1. 오늘의 일기
             SectionTitle(tr.todaysDiary),
             if (todayDiaries.isEmpty)
               Card(
                 elevation: 0,
-                color: t.colorScheme.secondaryContainer,
-                child: ListTile(
-                  leading: const Icon(Icons.edit_outlined),
-                  title: Text(tr.notWrittenToday),
-                  trailing: const Icon(Icons.chevron_right),
+                margin: EdgeInsets.zero,
+                color: t.colorScheme.primaryContainer,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(12),
                   onTap: () => openDiaryEditor(context, null),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(children: [
+                      Icon(Icons.edit_outlined, color: t.colorScheme.onPrimaryContainer),
+                      const SizedBox(width: 14),
+                      Expanded(
+                        child: Text(tr.notWrittenToday,
+                            style: t.textTheme.titleMedium
+                                ?.copyWith(color: t.colorScheme.onPrimaryContainer)),
+                      ),
+                      Icon(Icons.chevron_right, color: t.colorScheme.onPrimaryContainer),
+                    ]),
+                  ),
                 ),
               )
             else
               ...todayDiaries.map((e) => DiaryCard(entry: e)),
+
+            // 2. 진행 중인 목표
+            SectionTitle(tr.goalsInProgress, onMore: activeGoals.isEmpty ? null : () => onNavigate(2)),
+            if (activeGoals.isEmpty)
+              _Hint(tr.goalsHomeHint, () => openGoalEditor(context, null))
+            else
+              ...activeGoals.take(3).map((g) => GoalCard(goal: g)),
+
+            // 3. 지난 오늘 (있을 때만)
             if (pastToday.isNotEmpty) ...[
               SectionTitle(tr.pastToday),
               for (final e in pastToday) ...[
@@ -124,30 +105,24 @@ class HomeScreen extends StatelessWidget {
                 DiaryCard(entry: e),
               ],
             ],
-            if (reviewYear != null) ...[
-              const SizedBox(height: 16),
-              Card(
-                elevation: 0,
-                color: t.colorScheme.tertiaryContainer,
-                child: ListTile(
-                  leading: const Text('🎁', style: TextStyle(fontSize: 28)),
-                  title: Text(tr.yearReviewCard(reviewYear)),
-                  subtitle: Text(tr.yearReviewCardSub),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (_) => YearReviewScreen(initialYear: reviewYear))),
-                ),
+
+            // 4. 돌아보기 (타임라인 · 통계 · 연말 결산을 한곳에)
+            SectionTitle(tr.reflect),
+            Row(children: [
+              _ReflectTile('📜', tr.timeline,
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TimelineScreen()))),
+              const SizedBox(width: 8),
+              _ReflectTile('📊', tr.stats,
+                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsScreen()))),
+              const SizedBox(width: 8),
+              _ReflectTile(
+                '🎁',
+                tr.yearReview,
+                () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => YearReviewScreen(initialYear: reviewYear))),
+                highlight: reviewYear != null,
               ),
-            ],
-            SectionTitle(tr.goalsInProgress, onMore: activeGoals.isEmpty ? null : () => onNavigate(2)),
-            if (activeGoals.isEmpty)
-              _Hint(tr.goalsHomeHint, () => openGoalEditor(context, null))
-            else
-              ...activeGoals.take(3).map((g) => GoalCard(goal: g)),
-            if (recentDone.isNotEmpty) ...[
-              SectionTitle(tr.recentBuckets, onMore: () => onNavigate(1)),
-              ...recentDone.take(3).map((b) => BucketTile(item: b)),
-            ],
+            ]),
           ]);
         },
       ),
@@ -155,36 +130,35 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _StatCard extends StatelessWidget {
-  final IconData icon;
+class _ReflectTile extends StatelessWidget {
+  final String emoji;
   final String label;
-  final String value;
   final VoidCallback onTap;
-  const _StatCard(this.icon, this.label, this.value, this.onTap);
+  final bool highlight;
+  const _ReflectTile(this.emoji, this.label, this.onTap, {this.highlight = false});
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    return Card(
-      elevation: 0,
-      color: t.colorScheme.surfaceContainerHigh,
-      margin: EdgeInsets.zero,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(children: [
-                Icon(icon, size: 18, color: t.colorScheme.primary),
-                const SizedBox(width: 6),
-                Flexible(child: Text(label, style: t.textTheme.labelLarge, overflow: TextOverflow.ellipsis)),
-              ]),
-              Text(value, style: t.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-            ],
+    return Expanded(
+      child: Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        color: highlight ? t.colorScheme.tertiaryContainer : t.colorScheme.surfaceContainerHigh,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            child: Column(children: [
+              Text(emoji, style: const TextStyle(fontSize: 26)),
+              const SizedBox(height: 6),
+              Text(label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: t.textTheme.labelLarge),
+            ]),
           ),
         ),
       ),

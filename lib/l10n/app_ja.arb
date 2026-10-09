@@ -353,5 +353,13 @@
   "tlGoalStart": "目標スタート",
   "tlGoalDone": "目標完了",
   "tlCareer": "{type} 開始",
-  "tlCount": "{n}の瞬間"
+  "tlCount": "{n}の瞬間",
+  "homeGreeting": "今日も記録してみましょうか？",
+  "reflect": "振り返り",
+  "diaryMore": "タグ・関連する目標",
+  "setDisplaySub": "言語、テーマ、ダークモード、フォント",
+  "setNotifSub": "毎日の日記リマインダー",
+  "setSecuritySub": "アプリロック、指紋",
+  "setBackupSub": "Googleドライブに記録を保管",
+  "setAboutSub": "プライバシーポリシー、ライセンス"
 }
