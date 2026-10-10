@@ -294,6 +294,15 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
     if (mounted) Navigator.pop(context, true);
   }
 
+  /// 고른 유형에 맞는 입력 예시
+  ({String name, String org, String desc, String skills, String link}) get _hints => switch (d.type) {
+        '경력' => (name: tr.hWorkName, org: tr.hWorkOrg, desc: tr.hWorkDesc, skills: tr.hWorkSkills, link: tr.hWorkLink),
+        '학력' => (name: tr.hEduName, org: tr.hEduOrg, desc: tr.hEduDesc, skills: tr.hEduSkills, link: tr.hEduLink),
+        '자격·수상' => (name: tr.hAwardName, org: tr.hAwardOrg, desc: tr.hAwardDesc, skills: tr.hAwardSkills, link: tr.hAwardLink),
+        '활동' => (name: tr.hActName, org: tr.hActOrg, desc: tr.hActDesc, skills: tr.hActSkills, link: tr.hActLink),
+        _ => (name: tr.hProjName, org: tr.hProjOrg, desc: tr.hProjDesc, skills: tr.hProjSkills, link: tr.hProjLink),
+      };
+
   Widget _field(TextEditingController c, String label,
           {String? hint, int minLines = 1, int? maxLines = 1, TextInputType? type}) =>
       Padding(
@@ -331,8 +340,8 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
             ),
         ]),
         const SizedBox(height: 16),
-        _field(_title, tr.name, hint: tr.careerNameHint),
-        _field(_org, tr.optional(tr.careerOrg), hint: tr.careerOrgHint),
+        _field(_title, tr.name, hint: _hints.name),
+        _field(_org, tr.optional(tr.careerOrg), hint: _hints.org),
         DateTile(
           label: tr.start,
           value: d.startDate,
@@ -368,9 +377,9 @@ class _CareerEditorState extends State<CareerEditor> with DirtyGuard<CareerEdito
             },
           ),
         const SizedBox(height: 12),
-        _field(_desc, tr.description, hint: tr.careerDescHint, minLines: 5, maxLines: null),
-        _field(_skills, tr.careerSkillsField, hint: tr.careerSkillsHint),
-        _field(_link, tr.optional(tr.link), hint: tr.careerLinkHint, type: TextInputType.url),
+        _field(_desc, tr.description, hint: _hints.desc, minLines: 5, maxLines: null),
+        _field(_skills, tr.careerSkillsField, hint: _hints.skills),
+        _field(_link, tr.optional(tr.link), hint: _hints.link, type: TextInputType.url),
         PhotoEditor(photos: d.photos, label: tr.careerImages, onChanged: markDirty),
         const SizedBox(height: 24),
       ]),
