@@ -37,7 +37,7 @@ String _clean(String s) => s.replaceAll(_emoji, '').replaceAll(RegExp(r'[ \t]+\n
 Future<Uint8List> _emojiPng(String e) async {
   final tp = TextPainter(
     text: TextSpan(text: e, style: const TextStyle(fontSize: 96)),
-    textDirection: TextDirection.ltr,
+    textDirection: ui.TextDirection.ltr,
   )..layout();
   final rec = ui.PictureRecorder();
   tp.paint(ui.Canvas(rec), Offset.zero);
