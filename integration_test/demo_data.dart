@@ -275,7 +275,10 @@ Future<Uint8List> demoPhoto(String kind) async {
   void grad(List<ui.Color> colors, {bool vertical = true}) {
     final p = ui.Paint()
       ..shader = ui.Gradient.linear(
-          const ui.Offset(0, 0), vertical ? const ui.Offset(0, h) : const ui.Offset(w, h), colors);
+          const ui.Offset(0, 0),
+          vertical ? const ui.Offset(0, h) : const ui.Offset(w, h),
+          colors,
+          [for (var i = 0; i < colors.length; i++) i / (colors.length - 1)]);
     c.drawRect(const ui.Rect.fromLTWH(0, 0, w, h), p);
   }
 
