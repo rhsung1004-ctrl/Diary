@@ -108,7 +108,7 @@ void main() {
       // 4. 목표 + 연결된 일기
       final goal = AppStore.instance.goals.firstWhere((g) => g.id == 'g1');
       await push(GoalEditor(goal: goal));
-      await tester.drag(find.byType(ListView).last, const Offset(0, -520));
+      await tester.drag(find.byType(ListView).last, const Offset(0, -250));
       await shot(lang, '4_goal');
       await popAll();
 
