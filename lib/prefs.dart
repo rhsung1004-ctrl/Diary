@@ -29,7 +29,6 @@ class AppPrefs extends ChangeNotifier {
 
   // 프로 (구매 내역 기억)
   bool isPro = false;
-  List<String> trialsUsed = []; // 1회 무료 체험을 쓴 기능 (diaryPdf, portfolioPdf)
 
   // 앱 잠금
   String? pinHash; // sha256(salt + pin)
@@ -63,7 +62,6 @@ class AppPrefs extends ChangeNotifier {
       actionCount = m['actionCount'] as int? ?? 0;
       reviewNextAt = m['reviewNextAt'] as int? ?? 5;
       isPro = m['isPro'] as bool? ?? false;
-      trialsUsed = (m['trialsUsed'] as List?)?.map((e) => e.toString()).toList() ?? [];
     } catch (e) {
       debugPrint('설정 읽기 실패: $e');
     }
@@ -90,7 +88,6 @@ class AppPrefs extends ChangeNotifier {
       'actionCount': actionCount,
       'reviewNextAt': reviewNextAt,
       'isPro': isPro,
-      'trialsUsed': trialsUsed,
     }));
     await tmp.rename(_file.path);
   }

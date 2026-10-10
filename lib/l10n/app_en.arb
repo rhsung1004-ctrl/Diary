@@ -403,7 +403,7 @@
   "dpFile": "Diary",
   "proName": "LifeBox Pro",
   "proTagline": "One-time purchase, yours forever",
-  "proB1": "📄 Portfolio & diary book PDF (1 free try each)",
+  "proB1": "📄 Save & print portfolio and diary book PDFs (preview is free)",
   "proB2": "📜 My timeline · 🎁 Year in review",
   "proB3": "☁️ Automatic backup",
   "proB4": "🎨 5 extra theme colors + all fonts",
@@ -420,9 +420,5 @@
   "proPending": "Processing your payment",
   "proFailed": "The purchase didn't complete",
   "proLocked": "This is a Pro feature",
-  "trialTitle": "One free try",
-  "trialBody": "This is a Pro feature, but you can save or print once for free. Use your free try now?\n(You can save and print as often as you like until you leave this screen)",
-  "trialUse": "Use free try",
-  "trialLeftNote": "1 free try left · used when you save or print",
-  "trialUsedNote": "Free try already used · saving and printing are part of Pro"
+  "pdfProNote": "Preview is free · saving and printing are part of Pro"
 }

@@ -131,7 +131,6 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
         MaterialPageRoute(
             builder: (_) => PdfPreviewScreen(
                 bytes: bytes,
-                trialKey: 'portfolioPdf',
                 fileName: name.isEmpty ? 'portfolio.pdf' : '${name}_${tr.pdfFileSuffix}.pdf')));
   }
 
@@ -190,47 +189,20 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
 
 /// PDF 미리보기 + 인쇄 + 공유 (포트폴리오·일기장 공용)
 /// PDF 미리보기는 누구나 볼 수 있고, 저장·공유·인쇄는 프로 기능.
-/// 프로가 아니면 기능마다 1번은 무료로 체험할 수 있음.
-class PdfPreviewScreen extends StatefulWidget {
+class PdfPreviewScreen extends StatelessWidget {
   final Future<Uint8List> bytes;
   final String fileName;
-  final String trialKey;
-  const PdfPreviewScreen({super.key, required this.bytes, required this.fileName, required this.trialKey});
+  const PdfPreviewScreen({super.key, required this.bytes, required this.fileName});
 
-  @override
-  State<PdfPreviewScreen> createState() => _PdfPreviewScreenState();
-}
-
-class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
-  bool _trialNow = false; // 이 화면에서 체험을 쓰는 중 (공유를 취소해도 다시 시도 가능)
-
-  String get _fileName => widget.fileName;
-  bool get _trialLeft => !AppPrefs.instance.trialsUsed.contains(widget.trialKey);
-
-  Future<bool> _canExport() async {
-    if (ProService.instance.isPro || _trialNow) return true;
-    if (_trialLeft) {
-      final ok = await confirmDialog(context, tr.trialTitle, tr.trialBody, tr.trialUse);
-      if (!ok) return false;
-      final key = widget.trialKey;
-      await AppPrefs.instance.update((p) => p.trialsUsed = [...p.trialsUsed, key]);
-      setState(() => _trialNow = true);
-      return true;
-    }
-    if (!mounted) return false;
-    return requirePro(context);
-  }
-
-  Future<void> _export(Future<void> Function(Uint8List b) action) async {
-    if (!await _canExport()) return;
-    final b = await widget.bytes;
+  Future<void> _export(BuildContext context, Future<void> Function(Uint8List b) action) async {
+    if (!await requirePro(context)) return;
+    final b = await bytes;
     await AppLock.instance.runExternal(() => action(b));
   }
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
-    final showNote = !ProService.instance.isPro && !_trialNow;
     return Scaffold(
       appBar: AppBar(
         title: Text(tr.preview),
@@ -238,44 +210,48 @@ class _PdfPreviewScreenState extends State<PdfPreviewScreen> {
           IconButton(
             tooltip: tr.print,
             icon: const Icon(Icons.print_outlined),
-            onPressed: () => _export((b) => Printing.layoutPdf(onLayout: (_) async => b, name: _fileName)),
+            onPressed: () => _export(context, (b) => Printing.layoutPdf(onLayout: (_) async => b, name: fileName)),
           ),
           IconButton(
             tooltip: tr.shareSave,
             icon: const Icon(Icons.share_outlined),
-            onPressed: () => _export((b) => Printing.sharePdf(bytes: b, filename: _fileName)),
+            onPressed: () => _export(context, (b) => Printing.sharePdf(bytes: b, filename: fileName)),
           ),
         ],
       ),
-      bottomNavigationBar: !showNote
-          ? null
-          : SafeArea(
-              child: Material(
-                color: t.colorScheme.tertiaryContainer,
-                child: InkWell(
-                  onTap: _trialLeft ? null : () => requirePro(context),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: Row(children: [
-                      Text(_trialLeft ? '🎁' : '💎', style: const TextStyle(fontSize: 20)),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(_trialLeft ? tr.trialLeftNote : tr.trialUsedNote,
-                            style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onTertiaryContainer)),
-                      ),
-                    ]),
+      bottomNavigationBar: ListenableBuilder(
+        listenable: AppPrefs.instance,
+        builder: (context, _) => ProService.instance.isPro
+            ? const SizedBox.shrink()
+            : SafeArea(
+                child: Material(
+                  color: t.colorScheme.tertiaryContainer,
+                  child: InkWell(
+                    onTap: () => requirePro(context),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Row(children: [
+                        const Text('💎', style: TextStyle(fontSize: 20)),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(tr.pdfProNote,
+                              style: t.textTheme.bodyMedium?.copyWith(color: t.colorScheme.onTertiaryContainer)),
+                        ),
+                        Icon(Icons.chevron_right, color: t.colorScheme.onTertiaryContainer),
+                      ]),
+                    ),
                   ),
                 ),
               ),
-            ),
+      ),
       body: PdfPreview(
-        build: (_) => widget.bytes,
+        build: (_) => bytes,
         allowPrinting: false,
         allowSharing: false,
         canChangePageFormat: false,
         canChangeOrientation: false,
         canDebug: false,
-        pdfFileName: _fileName,
+        pdfFileName: fileName,
       ),
     );
   }
