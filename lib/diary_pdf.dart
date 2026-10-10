@@ -140,14 +140,8 @@ Future<Uint8List> buildDiaryPdf({
     final body = <pw.Widget>[];
     for (var i = 0; i < list.length; i++) {
       final e = list[i];
-      if (i > 0) {
-        body.add(pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(vertical: 18),
-          child: pw.Center(
-            child: pw.Text('·  ·  ·', style: pw.TextStyle(fontSize: 12, color: muted, letterSpacing: 2)),
-          ),
-        ));
-      }
+      // 일기 사이 여백 (페이지 맨 위에 오면 그냥 빈 공간이 됨)
+      if (i > 0) body.add(pw.SizedBox(height: 28));
       // 날짜 머리
       body.add(pw.Row(crossAxisAlignment: pw.CrossAxisAlignment.end, children: [
         pw.Text('${e.date.day}',
