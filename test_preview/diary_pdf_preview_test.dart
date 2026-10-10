@@ -11,7 +11,10 @@ import '../integration_test/demo_data.dart';
 
 void main() {
   testWidgets('diary pdf preview', (tester) async {
+    await Directory('screenshots').create(recursive: true);
+    Object? err;
     await tester.runAsync(() async {
+     try {
       final tmp = await Directory.systemTemp.createTemp('lb');
       AppStore.instance.photoDir = tmp;
       for (final p in demoPhotoNames) {
@@ -36,6 +39,13 @@ void main() {
         await Directory('screenshots').create(recursive: true);
         await File('screenshots/diary_$font.pdf').writeAsBytes(bytes);
       }
+     } catch (e, st) {
+      err = e;
+      await File('screenshots/pdf_error.txt').writeAsString('$e\n$st');
+     }
     });
+    final ex = tester.takeException();
+    if (ex != null) await File('screenshots/pdf_exception.txt').writeAsString('$ex');
+    expect(err, isNull);
   });
 }

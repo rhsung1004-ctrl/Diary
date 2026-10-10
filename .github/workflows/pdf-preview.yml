@@ -1,0 +1,33 @@
+# 일기장 PDF 모양 확인용: 예시 데이터로 PDF를 만들어 pdf-preview 브랜치에 올림
+name: Diary PDF preview
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Build sample PDFs
+        continue-on-error: true
+        run: flutter test test_preview/diary_pdf_preview_test.dart 2>&1 | tee test.log
+      - name: Push
+        run: |
+          mkdir -p screenshots; cp test.log screenshots/ || true
+          ls -la screenshots
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan pdf-preview
+          git rm -rf --cached . > /dev/null
+          git add -f screenshots
+          git commit -m "PDF preview"
+          git push -f origin pdf-preview

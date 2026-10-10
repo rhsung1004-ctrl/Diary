@@ -32,9 +32,6 @@ jobs:
 
       - run: flutter pub get
 
-      - name: Diary PDF preview
-        continue-on-error: true
-        run: flutter test test_preview/diary_pdf_preview_test.dart
 
       - name: Capture on emulator
         uses: reactivecircus/android-emulator-runner@v2
