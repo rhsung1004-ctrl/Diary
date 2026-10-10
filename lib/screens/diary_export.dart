@@ -95,7 +95,7 @@ class _DiaryExportScreenState extends State<DiaryExportScreen> {
       accentArgb: themeColors[AppPrefs.instance.colorIndex.clamp(0, themeColors.length - 1)].seed.toARGB32(),
     );
     final name = '${tr.dpFile}_${from.year}${two(from.month)}${two(from.day)}-${to.year}${two(to.month)}${two(to.day)}.pdf';
-    Navigator.push(context, MaterialPageRoute(builder: (_) => PdfPreviewScreen(bytes: bytes, fileName: name)));
+    Navigator.push(context, MaterialPageRoute(builder: (_) => PdfPreviewScreen(bytes: bytes, fileName: name, trialKey: 'diaryPdf')));
   }
 
   @override

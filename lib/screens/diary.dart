@@ -10,7 +10,6 @@ import 'diary_calendar.dart';
 import 'diary_export.dart';
 import 'diary_prompts.dart';
 import '../i18n.dart';
-import '../pro.dart';
 
 class DiaryScreen extends StatefulWidget {
   const DiaryScreen({super.key});
@@ -32,10 +31,8 @@ class _DiaryScreenState extends State<DiaryScreen> {
           IconButton(
             tooltip: tr.dpTitle,
             icon: const Icon(Icons.picture_as_pdf_outlined),
-            onPressed: () async {
-              if (!await requirePro(context) || !context.mounted) return;
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const DiaryExportScreen()));
-            },
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const DiaryExportScreen())),
           ),
           IconButton(
             tooltip: tr.tagBrowse,
