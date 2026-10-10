@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:lifebox/diary_pdf.dart';
 import 'package:lifebox/main.dart' as app;
 import 'package:lifebox/prefs.dart';
 import 'package:lifebox/review.dart';
@@ -134,5 +135,25 @@ void main() {
       // 다음 언어를 위해 홈으로
       await tapTab(Icons.home_outlined);
     }
+
+    // 일기장 PDF 샘플 (확인용) → 드라이버가 파일로 저장
+    await AppStore.instance.replaceAll(demoData('ko'));
+    await AppPrefs.instance.update((p) => p.language = 'ko');
+    await settle();
+    final pdfs = <String, String>{};
+    for (final font in ['gowunBatang', 'nanumPen']) {
+      final bytes = await buildDiaryPdf(
+        entries: AppStore.instance.diaries.where((e) => DateTime.now().difference(e.date).inDays < 40).toList(),
+        title: '한여름의 일기장',
+        from: DateTime.now().subtract(const Duration(days: 40)),
+        to: DateTime.now(),
+        includePhotos: true,
+        fontKey: font,
+        sizeFactor: font == 'nanumPen' ? 1.3 : 1.0,
+        accentArgb: 0xFF3D7A6E,
+      );
+      pdfs['diary_$font'] = base64Encode(bytes);
+    }
+    binding.reportData = pdfs;
   });
 }
