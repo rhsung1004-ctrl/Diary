@@ -22,6 +22,7 @@ import 'theme.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'i18n.dart';
+import 'pro.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +42,7 @@ Future<void> main() async {
   await Reminder.init(); // 알림을 눌러 열린 경우를 알아야 해서 먼저
   runApp(const LifeBoxApp());
   // 구글 로그인 복구 → 필요하면 자동 백업 (화면 표시를 막지 않음)
+  unawaited(ProService.instance.init());
   unawaited(BackupService.instance.init().then((_) => BackupService.instance.autoBackupIfNeeded()));
 }
 

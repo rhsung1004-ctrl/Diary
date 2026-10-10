@@ -27,6 +27,9 @@ class AppPrefs extends ChangeNotifier {
   int actionCount = 0; // 기록 저장 횟수
   int reviewNextAt = 5; // 이 횟수가 되면 리뷰 요청 (0 = 다시 안 물어봄)
 
+  // 프로 (구매 내역 기억)
+  bool isPro = false;
+
   // 앱 잠금
   String? pinHash; // sha256(salt + pin)
   String? pinSalt;
@@ -58,6 +61,7 @@ class AppPrefs extends ChangeNotifier {
       onboarded = m['onboarded'] as bool? ?? false;
       actionCount = m['actionCount'] as int? ?? 0;
       reviewNextAt = m['reviewNextAt'] as int? ?? 5;
+      isPro = m['isPro'] as bool? ?? false;
     } catch (e) {
       debugPrint('설정 읽기 실패: $e');
     }
@@ -83,6 +87,7 @@ class AppPrefs extends ChangeNotifier {
       'onboarded': onboarded,
       'actionCount': actionCount,
       'reviewNextAt': reviewNextAt,
+      'isPro': isPro,
     }));
     await tmp.rename(_file.path);
   }

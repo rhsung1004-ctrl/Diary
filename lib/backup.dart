@@ -10,6 +10,7 @@ import 'package:googleapis/drive/v3.dart' as drive;
 import 'config.dart';
 import 'store.dart';
 import 'i18n.dart';
+import 'pro.dart';
 
 class BackupException implements Exception {
   final String message;
@@ -267,7 +268,7 @@ class BackupService extends ChangeNotifier {
 
   /// 자동 백업: 연결돼 있고, 기록이 바뀌었고, 마지막 백업 후 30분이 지났을 때만
   Future<void> autoBackupIfNeeded() async {
-    if (!autoBackup || busy || !configured) return;
+    if (!autoBackup || busy || !configured || !ProService.instance.isPro) return;
     await _ready.future;
     if (account == null) return;
     final modified = await AppStore.instance.dataModifiedAt();

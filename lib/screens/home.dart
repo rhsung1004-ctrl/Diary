@@ -10,6 +10,7 @@ import 'stats.dart';
 import 'timeline.dart';
 import 'year_review.dart';
 import '../i18n.dart';
+import '../pro.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigate;
@@ -109,8 +110,10 @@ class HomeScreen extends StatelessWidget {
             // 4. 돌아보기 (타임라인 · 통계 · 연말 결산을 한곳에)
             SectionTitle(tr.reflect),
             Row(children: [
-              _ReflectTile('📜', tr.timeline,
-                  () => Navigator.push(context, MaterialPageRoute(builder: (_) => const TimelineScreen()))),
+              _ReflectTile('📜', tr.timeline, () async {
+                if (!await requirePro(context) || !context.mounted) return;
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const TimelineScreen()));
+              }, pro: true),
               const SizedBox(width: 8),
               _ReflectTile('📊', tr.stats,
                   () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StatsScreen()))),
@@ -118,9 +121,13 @@ class HomeScreen extends StatelessWidget {
               _ReflectTile(
                 '🎁',
                 tr.yearReview,
-                () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => YearReviewScreen(initialYear: reviewYear))),
+                () async {
+                  if (!await requirePro(context) || !context.mounted) return;
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => YearReviewScreen(initialYear: reviewYear)));
+                },
                 highlight: reviewYear != null,
+                pro: true,
               ),
             ]),
           ]);
@@ -135,7 +142,8 @@ class _ReflectTile extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool highlight;
-  const _ReflectTile(this.emoji, this.label, this.onTap, {this.highlight = false});
+  final bool pro;
+  const _ReflectTile(this.emoji, this.label, this.onTap, {this.highlight = false, this.pro = false});
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +159,10 @@ class _ReflectTile extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             child: Column(children: [
-              Text(emoji, style: const TextStyle(fontSize: 26)),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                Text(emoji, style: const TextStyle(fontSize: 26)),
+                if (pro) const ProBadge(),
+              ]),
               const SizedBox(height: 6),
               Text(label,
                   textAlign: TextAlign.center,

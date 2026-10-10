@@ -7,6 +7,7 @@ import '../photos.dart';
 import '../store.dart';
 import 'portfolio.dart';
 import '../i18n.dart';
+import '../pro.dart';
 
 String careerPeriod(CareerItem c) {
   if (c.startDate == null) return '';
@@ -40,8 +41,10 @@ class _CareerScreenState extends State<CareerScreen> {
           IconButton(
             tooltip: tr.exportPdf,
             icon: const Icon(Icons.picture_as_pdf_outlined),
-            onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const PortfolioExportScreen())),
+            onPressed: () async {
+              if (!await requirePro(context) || !context.mounted) return;
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const PortfolioExportScreen()));
+            },
           ),
         ],
       ),

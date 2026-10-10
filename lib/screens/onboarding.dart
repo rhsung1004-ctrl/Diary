@@ -6,6 +6,7 @@ import '../i18n.dart';
 import '../lock.dart';
 import '../prefs.dart';
 import '../theme.dart';
+import '../pro.dart';
 
 const _langNames = {'ko': '한국어', 'en': 'English', 'ja': '日本語'};
 
@@ -198,7 +199,10 @@ class _Style extends StatelessWidget {
             for (var i = 0; i < themeColors.length; i++)
               InkWell(
                 customBorder: const CircleBorder(),
-                onTap: () => prefs.update((p) => p.colorIndex = i),
+                onTap: () async {
+                  if (i != 0 && !await requirePro(context)) return;
+                  await prefs.update((p) => p.colorIndex = i);
+                },
                 child: Column(children: [
                   CircleAvatar(
                     radius: 24,

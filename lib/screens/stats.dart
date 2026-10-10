@@ -5,6 +5,7 @@ import '../models.dart';
 import '../store.dart';
 import 'year_review.dart';
 import '../i18n.dart';
+import '../pro.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -26,8 +27,10 @@ class _StatsScreenState extends State<StatsScreen> {
           TextButton.icon(
             icon: const Icon(Icons.card_giftcard_outlined),
             label: Text(tr.yearReview),
-            onPressed: () =>
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const YearReviewScreen())),
+            onPressed: () async {
+              if (!await requirePro(context) || !context.mounted) return;
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const YearReviewScreen()));
+            },
           ),
         ],
       ),
@@ -69,7 +72,11 @@ class _StatsScreenState extends State<StatsScreen> {
                   ButtonSegment(value: false, label: Text(tr.all)),
                 ],
                 selected: {_moodRecent},
-                onSelectionChanged: (s) => setState(() => _moodRecent = s.first),
+                onSelectionChanged: (s) async {
+                  // 전체 기간은 프로
+                  if (!s.first && !await requirePro(context)) return;
+                  if (mounted) setState(() => _moodRecent = s.first);
+                },
               ),
               child: _MoodBars(
                 entries: _moodRecent

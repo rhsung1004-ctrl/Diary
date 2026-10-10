@@ -8,6 +8,7 @@ import '../prefs.dart';
 import '../reminder.dart';
 import '../theme.dart';
 import '../i18n.dart';
+import '../pro.dart';
 
 const _langNames = {'ko': '한국어', 'en': 'English', 'ja': '日本語'};
 const _privacyUrl = 'https://github.com/rhsung1004-ctrl/Diary/blob/main/PRIVACY.md';
@@ -23,6 +24,18 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(padding: const EdgeInsets.fromLTRB(16, 8, 16, 32), children: [
         Card(
           child: Column(children: [
+            ListTile(
+              leading: const Text('💎', style: TextStyle(fontSize: 22)),
+              title: Text(tr.proName),
+              subtitle: ListenableBuilder(
+                listenable: AppPrefs.instance,
+                builder: (context, _) =>
+                    Text(AppPrefs.instance.isPro ? tr.proActive : tr.proTagline),
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProScreen())),
+            ),
+            const Divider(height: 1),
             _menu(context, Icons.palette_outlined, tr.display, tr.setDisplaySub, const _AppearanceSection()),
             _menu(context, Icons.notifications_outlined, tr.notifications, tr.setNotifSub, const _ReminderSection()),
             _menu(context, Icons.lock_outline, tr.security, tr.setSecuritySub, const _LockSection()),
@@ -83,14 +96,20 @@ class _AppearanceSection extends StatelessWidget {
                   for (var i = 0; i < themeColors.length; i++)
                     InkWell(
                       customBorder: const CircleBorder(),
-                      onTap: () => prefs.update((p) => p.colorIndex = i),
+                      onTap: () async {
+                        // 기본 색(숲) 외에는 프로
+                        if (i != 0 && !await requirePro(context)) return;
+                        await prefs.update((p) => p.colorIndex = i);
+                      },
                       child: Column(children: [
                         CircleAvatar(
                           radius: 20,
                           backgroundColor: themeColors[i].seed,
                           child: prefs.colorIndex == i
                               ? const Icon(Icons.check, color: Colors.white)
-                              : null,
+                              : (i != 0 && !ProService.instance.isPro
+                                  ? const Icon(Icons.lock_outline, color: Colors.white70, size: 16)
+                                  : null),
                         ),
                         const SizedBox(height: 4),
                         Text(themeColors[i].name, style: t.textTheme.labelSmall),
@@ -175,9 +194,12 @@ class _AppearanceSection extends StatelessWidget {
               leading: Icon(fontByKey(prefs.font).key == f.key
                   ? Icons.radio_button_checked
                   : Icons.radio_button_unchecked),
-              onTap: () {
-                prefs.update((p) => p.font = f.key);
-                Navigator.pop(ctx);
+              trailing: f.key != fontsFor(appLang).first.key ? const ProBadge() : null,
+              onTap: () async {
+                // 언어별 기본 글꼴 외에는 프로
+                if (f.key != fontsFor(appLang).first.key && !await requirePro(ctx)) return;
+                await prefs.update((p) => p.font = f.key);
+                if (ctx.mounted) Navigator.pop(ctx);
               },
               title: Text(f.label,
                   style: TextStyle(fontFamily: f.family, fontSize: 16 * f.sizeFactor)),
@@ -296,6 +318,7 @@ class _LockSectionState extends State<_LockSection> {
   }
 
   Future<void> _toggleBio(bool v) async {
+    if (v && !await requirePro(context)) return;
     if (v && !await AppLock.instance.authenticateBiometric()) return;
     await AppPrefs.instance.update((p) => p.biometric = v);
   }
@@ -440,7 +463,10 @@ class _BackupSection extends StatelessWidget {
               title: Text(tr.autoBackup),
               subtitle: Text(tr.autoBackupSub),
               value: svc.autoBackup,
-              onChanged: svc.setAutoBackup,
+              onChanged: (v) async {
+                if (v && !await requirePro(context)) return;
+                await svc.setAutoBackup(v);
+              },
             ),
           ),
         ]);
