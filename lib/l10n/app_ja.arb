@@ -386,5 +386,19 @@
   "hActOrg": "例）○○サークル・代表",
   "hActDesc": "やったこと、役割、学んだこと",
   "hActSkills": "リーダーシップ、コミュニケーション",
-  "hActLink": "活動記録、ブログのURL"
+  "hActLink": "活動記録、ブログのURL",
+  "dpTitle": "日記帳PDF",
+  "dpPeriod": "期間",
+  "dpThisMonth": "今月",
+  "dpThisYear": "今年",
+  "dpAll": "すべて",
+  "dpCustom": "期間を選ぶ",
+  "dpCoverTitle": "表紙のタイトル",
+  "dpCoverDefault": "わたしの日記帳",
+  "dpCoverOf": "{name}の日記帳",
+  "dpPhotos": "写真を含める",
+  "dpCount": "{n}件の日記",
+  "dpNone": "この期間の日記はありません",
+  "dpMake": "日記帳を作る",
+  "dpFile": "日記帳"
 }

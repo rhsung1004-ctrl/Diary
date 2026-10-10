@@ -7,6 +7,7 @@ import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
 import 'diary_calendar.dart';
+import 'diary_export.dart';
 import 'diary_prompts.dart';
 import '../i18n.dart';
 
@@ -27,6 +28,12 @@ class _DiaryScreenState extends State<DiaryScreen> {
       appBar: AppBar(
         title: Text(tr.diary),
         actions: [
+          IconButton(
+            tooltip: tr.dpTitle,
+            icon: const Icon(Icons.picture_as_pdf_outlined),
+            onPressed: () =>
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const DiaryExportScreen())),
+          ),
           IconButton(
             tooltip: tr.tagBrowse,
             icon: const Icon(Icons.tag),

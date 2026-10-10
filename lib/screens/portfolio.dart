@@ -124,7 +124,13 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
       includeImages: _images,
       accentArgb: themeColors[prefs.colorIndex.clamp(0, themeColors.length - 1)].seed.toARGB32(),
     );
-    Navigator.push(context, MaterialPageRoute(builder: (_) => _PdfPreviewScreen(bytes: bytes)));
+    final name = store.profile.name;
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (_) => PdfPreviewScreen(
+                bytes: bytes,
+                fileName: name.isEmpty ? 'portfolio.pdf' : '${name}_${tr.pdfFileSuffix}.pdf')));
   }
 
   @override
@@ -180,14 +186,13 @@ class _PortfolioExportScreenState extends State<PortfolioExportScreen> {
   }
 }
 
-class _PdfPreviewScreen extends StatelessWidget {
+/// PDF 미리보기 + 인쇄 + 공유 (포트폴리오·일기장 공용)
+class PdfPreviewScreen extends StatelessWidget {
   final Future<Uint8List> bytes;
-  const _PdfPreviewScreen({required this.bytes});
+  final String fileName;
+  const PdfPreviewScreen({super.key, required this.bytes, required this.fileName});
 
-  String get _fileName {
-    final name = AppStore.instance.profile.name;
-    return name.isEmpty ? 'portfolio.pdf' : '${name}_${tr.pdfFileSuffix}.pdf';
-  }
+  String get _fileName => fileName;
 
   @override
   Widget build(BuildContext context) {

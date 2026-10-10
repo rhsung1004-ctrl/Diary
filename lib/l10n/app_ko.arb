@@ -763,5 +763,33 @@
   "hActOrg": "예) ○○동아리 · 회장",
   "hActDesc": "한 일, 맡은 역할, 배운 점",
   "hActSkills": "리더십, 커뮤니케이션",
-  "hActLink": "활동 기록, 블로그 주소"
+  "hActLink": "활동 기록, 블로그 주소",
+  "dpTitle": "일기장 PDF",
+  "dpPeriod": "기간",
+  "dpThisMonth": "이번 달",
+  "dpThisYear": "올해",
+  "dpAll": "전체",
+  "dpCustom": "직접 선택",
+  "dpCoverTitle": "표지 제목",
+  "dpCoverDefault": "나의 일기장",
+  "dpCoverOf": "{name}의 일기장",
+  "@dpCoverOf": {
+    "placeholders": {
+      "name": {
+        "type": "Object"
+      }
+    }
+  },
+  "dpPhotos": "사진 포함",
+  "dpCount": "{n}편의 일기",
+  "@dpCount": {
+    "placeholders": {
+      "n": {
+        "type": "Object"
+      }
+    }
+  },
+  "dpNone": "이 기간에 쓴 일기가 없어요",
+  "dpMake": "일기장 만들기",
+  "dpFile": "일기장"
 }

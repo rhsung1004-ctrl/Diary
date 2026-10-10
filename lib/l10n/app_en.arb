@@ -386,5 +386,19 @@
   "hActOrg": "e.g. ○○ Club · President",
   "hActDesc": "What you did, your role, what you learned",
   "hActSkills": "Leadership, Communication",
-  "hActLink": "Activity log or blog link"
+  "hActLink": "Activity log or blog link",
+  "dpTitle": "Diary book PDF",
+  "dpPeriod": "Period",
+  "dpThisMonth": "This month",
+  "dpThisYear": "This year",
+  "dpAll": "All",
+  "dpCustom": "Custom",
+  "dpCoverTitle": "Cover title",
+  "dpCoverDefault": "My Diary",
+  "dpCoverOf": "{name}'s Diary",
+  "dpPhotos": "Include photos",
+  "dpCount": "{n} entries",
+  "dpNone": "No entries in this period",
+  "dpMake": "Create diary book",
+  "dpFile": "Diary"
 }
