@@ -420,5 +420,20 @@
   "proPending": "Processing your payment",
   "proFailed": "The purchase didn't complete",
   "proLocked": "This is a Pro feature",
-  "pdfProNote": "Preview is free · saving and printing are part of Pro"
+  "pdfProNote": "Preview is free · saving and printing are part of Pro",
+  "voiceMemo": "Voice memos",
+  "voiceRecord": "Record a voice memo",
+  "voiceRecording": "Recording",
+  "voicePaused": "Paused",
+  "voicePlay": "Play",
+  "voicePause": "Pause",
+  "voiceResume": "Resume recording",
+  "voiceNoPermission": "Microphone access is needed. Allow it in phone Settings → Apps → LifeBox → Permissions",
+  "voiceFail": "Couldn't start recording",
+  "voiceTooShort": "The recording was too short, so it wasn't saved",
+  "voiceMax": "You can record up to 10 minutes at a time",
+  "voiceLeft": "{time} left",
+  "voiceDeleteTitle": "Delete this voice memo?",
+  "voiceDiary": "(Voice diary)",
+  "voiceCount": "{count} voice memos"
 }

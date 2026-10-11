@@ -136,6 +136,23 @@ class Goal {
 // ───────────────────────── 일기 ─────────────────────────
 const moods = ['😊', '😆', '🥰', '😌', '😐', '😢', '😠', '😴'];
 
+/// 일기에 붙인 음성 메모 (파일은 사진 폴더에 함께 보관)
+class VoiceMemo {
+  final String file;
+  final int ms; // 길이
+  const VoiceMemo(this.file, this.ms);
+
+  Map<String, dynamic> toJson() => {'file': file, 'ms': ms};
+
+  static List<VoiceMemo> listFrom(dynamic v) => v is List
+      ? [
+          for (final e in v)
+            if (e is Map && e['file'] is String)
+              VoiceMemo(e['file'] as String, (e['ms'] as num?)?.toInt() ?? 0),
+        ]
+      : <VoiceMemo>[];
+}
+
 class DiaryEntry {
   final String id;
   DateTime date;
@@ -143,6 +160,7 @@ class DiaryEntry {
   String body;
   String mood;
   List<String> photos;
+  List<VoiceMemo> voices;
   List<String> tags;
   String? goalId; // 관련 목표
   DateTime createdAt;
@@ -154,12 +172,14 @@ class DiaryEntry {
     this.body = '',
     this.mood = '',
     List<String>? photos,
+    List<VoiceMemo>? voices,
     List<String>? tags,
     this.goalId,
     DateTime? createdAt,
   })  : id = id ?? newId(),
         date = date ?? DateTime.now(),
         photos = photos ?? <String>[],
+        voices = voices ?? <VoiceMemo>[],
         tags = tags ?? <String>[],
         createdAt = createdAt ?? DateTime.now();
 
@@ -172,6 +192,7 @@ class DiaryEntry {
         'body': body,
         'mood': mood,
         'photos': List<String>.from(photos),
+        if (voices.isNotEmpty) 'voices': voices.map((v) => v.toJson()).toList(),
         'tags': List<String>.from(tags),
         'goalId': goalId,
         'createdAt': createdAt.toIso8601String(),
@@ -184,6 +205,7 @@ class DiaryEntry {
         body: j['body'] as String? ?? '',
         mood: j['mood'] as String? ?? '',
         photos: _strings(j['photos']),
+        voices: VoiceMemo.listFrom(j['voices']),
         tags: _strings(j['tags']),
         goalId: j['goalId'] as String?,
         createdAt: _date(j['createdAt']),

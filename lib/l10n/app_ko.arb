@@ -818,5 +818,34 @@
   "proPending": "결제를 처리하는 중이에요",
   "proFailed": "결제가 완료되지 않았어요",
   "proLocked": "프로 기능이에요",
-  "pdfProNote": "미리보기는 무료예요 · 저장·인쇄는 프로에서 할 수 있어요"
+  "pdfProNote": "미리보기는 무료예요 · 저장·인쇄는 프로에서 할 수 있어요",
+  "voiceMemo": "음성 메모",
+  "voiceRecord": "음성 메모 녹음",
+  "voiceRecording": "녹음 중",
+  "voicePaused": "일시정지됨",
+  "voicePlay": "재생",
+  "voicePause": "일시정지",
+  "voiceResume": "이어서 녹음",
+  "voiceNoPermission": "마이크 권한이 필요해요. 휴대폰 설정 → 앱 → LifeBox → 권한에서 마이크를 허용해 주세요",
+  "voiceFail": "녹음을 시작하지 못했어요",
+  "voiceTooShort": "녹음이 너무 짧아서 저장하지 않았어요",
+  "voiceMax": "한 번에 최대 10분까지 녹음할 수 있어요",
+  "voiceLeft": "{time} 남음",
+  "voiceDeleteTitle": "이 음성 메모를 지울까요?",
+  "voiceDiary": "(음성 일기)",
+  "voiceCount": "음성 {count}개",
+  "@voiceLeft": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "@voiceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

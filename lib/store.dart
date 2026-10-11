@@ -80,9 +80,11 @@ class AppStore extends ChangeNotifier {
   Set<String> get usedPhotos => {
         ...buckets.expand((e) => e.photos),
         ...diaries.expand((e) => e.photos),
+        ...diaries.expand((e) => e.voices.map((v) => v.file)),
         ...careers.expand((e) => e.photos),
         if (profile.photo.isNotEmpty) profile.photo,
         ...drafts.values.expand((d) => d.entry.photos), // 임시 저장 사진도 지우지 않음
+        ...drafts.values.expand((d) => d.entry.voices.map((v) => v.file)),
       };
 
   /// 일기 태그별 개수 (많이 쓴 순)
@@ -153,8 +155,11 @@ class AppStore extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ───── 사진 ─────
+  // ───── 사진 · 음성 ─────
   File photoFile(String name) => File('${photoDir.path}/$name');
+
+  /// 새 음성 메모 파일 이름 (사진 폴더에 함께 저장 → 백업·정리도 같이 됨)
+  String newVoiceName() => 'voice_${DateTime.now().microsecondsSinceEpoch}.m4a';
 
   Future<String> importPhoto(String srcPath) async {
     final dot = srcPath.lastIndexOf('.');

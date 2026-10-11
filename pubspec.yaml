@@ -29,6 +29,8 @@ dependencies:
   intl: any
   in_app_review: any
   in_app_purchase: ^3.2.0
+  record: ^6.0.0
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:

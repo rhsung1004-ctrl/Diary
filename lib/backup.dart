@@ -238,6 +238,11 @@ class BackupService extends ChangeNotifier {
             for (final item in map[key] as List)
               if (item is Map && item['photos'] is List)
                 ...(item['photos'] as List).map((p) => p.toString()),
+        if (map['diaries'] is List)
+          for (final item in map['diaries'] as List)
+            if (item is Map && item['voices'] is List)
+              for (final v in item['voices'] as List)
+                if (v is Map && v['file'] is String) v['file'] as String,
         if (map['profile'] is Map && ((map['profile'] as Map)['photo'] ?? '') != '')
           (map['profile'] as Map)['photo'].toString(),
       };

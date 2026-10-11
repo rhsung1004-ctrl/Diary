@@ -6,6 +6,7 @@ import '../common.dart';
 import '../models.dart';
 import '../photos.dart';
 import '../store.dart';
+import '../voice.dart';
 import 'diary_calendar.dart';
 import 'diary_export.dart';
 import 'diary_prompts.dart';
@@ -117,7 +118,7 @@ class DiaryCard extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(headline.isEmpty ? tr.photoDiary : headline,
+                Text(headline.isEmpty ? (e.photos.isEmpty && e.voices.isNotEmpty ? tr.voiceDiary : tr.photoDiary) : headline,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: t.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
@@ -128,6 +129,17 @@ class DiaryCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: t.textTheme.bodyMedium
                           ?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+                ],
+                if (e.voices.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Row(children: [
+                    Icon(Icons.mic_none, size: 16, color: t.colorScheme.primary),
+                    const SizedBox(width: 2),
+                    Text(e.voices.length == 1
+                        ? fmtVoiceLength(e.voices.first.ms)
+                        : tr.voiceCount(e.voices.length),
+                        style: t.textTheme.labelMedium?.copyWith(color: t.colorScheme.primary)),
+                  ]),
                 ],
                 if (e.tags.isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -188,6 +200,7 @@ class DiaryView extends StatelessWidget {
             const SizedBox(height: 16),
             PhotoGallery(e.photos),
             if (e.photos.isNotEmpty) const SizedBox(height: 16),
+            if (e.voices.isNotEmpty) ...[VoiceList(e.voices), const SizedBox(height: 8)],
             SelectableText(e.body, style: t.textTheme.bodyLarge?.copyWith(height: 1.7)),
             if (e.tags.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -271,6 +284,7 @@ class _DiaryEditorState extends State<DiaryEditor>
           ..date = e.date
           ..mood = e.mood
           ..photos = List.of(e.photos)
+          ..voices = List.of(e.voices)
           ..tags = List.of(e.tags)
           ..goalId = e.goalId;
         _title.text = e.title;
@@ -343,7 +357,7 @@ class _DiaryEditorState extends State<DiaryEditor>
     d
       ..title = _title.text.trim()
       ..body = _body.text.trimRight();
-    if (d.title.isEmpty && d.body.trim().isEmpty && d.photos.isEmpty) {
+    if (d.title.isEmpty && d.body.trim().isEmpty && d.photos.isEmpty && d.voices.isEmpty) {
       toast(context, tr.diaryNeedContent);
       return;
     }
@@ -510,6 +524,8 @@ class _DiaryEditorState extends State<DiaryEditor>
         ),
         const SizedBox(height: 8),
         PhotoEditor(photos: d.photos, onChanged: markDirty),
+        const SizedBox(height: 16),
+        VoiceEditor(voices: d.voices, onChanged: markDirty),
         const SizedBox(height: 24),
       ]),
     ));

@@ -420,5 +420,20 @@
   "proPending": "支払いを処理しています",
   "proFailed": "購入が完了しませんでした",
   "proLocked": "プロ機能です",
-  "pdfProNote": "プレビューは無料です · 保存・印刷はプロで利用できます"
+  "pdfProNote": "プレビューは無料です · 保存・印刷はプロで利用できます",
+  "voiceMemo": "ボイスメモ",
+  "voiceRecord": "ボイスメモを録音",
+  "voiceRecording": "録音中",
+  "voicePaused": "一時停止中",
+  "voicePlay": "再生",
+  "voicePause": "一時停止",
+  "voiceResume": "録音を再開",
+  "voiceNoPermission": "マイクの許可が必要です。端末の設定 → アプリ → LifeBox → 権限でマイクを許可してください",
+  "voiceFail": "録音を開始できませんでした",
+  "voiceTooShort": "録音が短すぎるため保存しませんでした",
+  "voiceMax": "1回につき最大10分まで録音できます",
+  "voiceLeft": "残り {time}",
+  "voiceDeleteTitle": "このボイスメモを削除しますか？",
+  "voiceDiary": "（音声日記）",
+  "voiceCount": "音声 {count}件"
 }
