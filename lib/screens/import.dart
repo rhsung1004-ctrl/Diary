@@ -92,27 +92,48 @@ class _ImportScreenState extends State<ImportScreen> {
         Text(tr.impIntro, style: t.textTheme.bodyLarge?.copyWith(height: 1.5)),
         const SizedBox(height: 16),
         if (p == null) ...[
+          // 3단계 안내
+          Card(
+            elevation: 0,
+            color: t.colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tr.impHowTitle, style: t.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 10),
+                for (final (i, step) in [tr.impStep1, tr.impStep2, tr.impStep3].indexed)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      CircleAvatar(
+                        radius: 11,
+                        backgroundColor: t.colorScheme.primary,
+                        child: Text('${i + 1}',
+                            style: TextStyle(fontSize: 12, color: t.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(child: Text(step, style: t.textTheme.bodyMedium?.copyWith(height: 1.4))),
+                    ]),
+                  ),
+              ]),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 6),
+            child: Text(tr.impTapForHow, style: t.textTheme.titleSmall),
+          ),
           Card(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
               child: Column(children: [
-                _fmt(Icons.auto_stories_outlined, 'Day One', tr.impDayOne),
-                _fmt(Icons.travel_explore_outlined, 'Journey', tr.impJourney),
-                _fmt(Icons.mood_outlined, 'Daylio', tr.impDaylio),
-                _fmt(Icons.table_chart_outlined, tr.impFmtCsv, tr.impCsv),
-                _fmt(Icons.notes_outlined, tr.impFmtText, tr.impText),
+                _fmt(Icons.auto_stories_outlined, 'Day One', tr.impDayOne, tr.impGuideDayOne),
+                _fmt(Icons.travel_explore_outlined, 'Journey', tr.impJourney, tr.impGuideJourney),
+                _fmt(Icons.mood_outlined, 'Daylio', tr.impDaylio, tr.impGuideDaylio),
+                _fmt(Icons.notes_outlined, tr.impFmtText, tr.impText, tr.impGuideText, example: tr.impTextExample),
+                _fmt(Icons.table_chart_outlined, tr.impFmtCsv, tr.impCsv, tr.impGuideCsv, example: tr.impCsvExample),
               ]),
             ),
-          ),
-          const SizedBox(height: 8),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: t.colorScheme.surfaceContainerHigh,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(tr.impTextExample,
-                style: t.textTheme.bodyMedium?.copyWith(fontFamily: 'monospace', height: 1.5)),
           ),
           const SizedBox(height: 20),
           if (_error != null) ...[
@@ -188,9 +209,68 @@ class _ImportScreenState extends State<ImportScreen> {
     );
   }
 
-  Widget _fmt(IconData icon, String name, String desc) => ListTile(
+  Widget _fmt(IconData icon, String name, String desc, String guide, {String? example}) => ListTile(
         leading: Icon(icon),
         title: Text(name),
         subtitle: Text(desc),
+        trailing: const Icon(Icons.help_outline),
+        onTap: () => _showGuide(name, guide, example),
       );
+
+  /// 앱별 내보내는 방법
+  void _showGuide(String name, String guide, String? example) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (ctx) {
+        final t = Theme.of(ctx);
+        return SafeArea(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.85),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(tr.impHowSheetTitle(name),
+                    style: t.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 14),
+                Text(guide, style: t.textTheme.bodyLarge?.copyWith(height: 1.6)),
+                if (example != null) ...[
+                  const SizedBox(height: 14),
+                  Text(tr.impExample, style: t.textTheme.titleSmall),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: t.colorScheme.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(example,
+                        style: t.textTheme.bodyMedium?.copyWith(fontFamily: 'monospace', height: 1.5)),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Text(tr.impGuideNote,
+                    style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant)),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: FilledButton.icon(
+                    icon: const Icon(Icons.file_open_outlined),
+                    label: Text(tr.impPickReady),
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      _pick();
+                    },
+                  ),
+                ),
+              ]),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }

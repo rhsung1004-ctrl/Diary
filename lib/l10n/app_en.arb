@@ -460,5 +460,20 @@
   "impErrEncoding": "Couldn't read the text. Please save the file as UTF-8 (Excel: Save As → CSV UTF-8)",
   "impErrNoEntries": "No entries found. Make sure the file includes dates",
   "impErrBroken": "The file is damaged or can't be opened",
-  "impErrUnsupported": "This file format isn't supported"
+  "impErrUnsupported": "This file format isn't supported",
+  "impHowTitle": "How it works",
+  "impStep1": "Export your diary as a file from the app you used",
+  "impStep2": "Save that file on your phone (Downloads folder or Google Drive)",
+  "impStep3": "Tap 'Choose a file' below and pick it. You'll see a preview before anything is imported",
+  "impTapForHow": "Tap the app you used to see how to export",
+  "impHowSheetTitle": "Moving from {app}",
+  "impExample": "Example",
+  "impPickReady": "My file is ready · Choose a file",
+  "impGuideNote": "Menu names may differ slightly depending on the app version and language.",
+  "impGuideDayOne": "1. In Day One, go to Settings → Sync and turn off 'Optimize Local Media Storage'. Wait until all photos have downloaded\n2. Go to Settings → Export\n3. Choose JSON\n4. When it's done, tap 'Save to device' in the notification to save the zip file\n\nOn iPhone: Settings → Import/Export → choose the journal → JSON. Then move the file to your Android phone.",
+  "impGuideJourney": "1. In Journey, go to Settings → Data & Cloud Services\n2. Choose the cloud service you use\n3. Tap Export/Backup to create a ZIP file\n4. Save the zip file on your phone\n\nTo move a single entry, open it and tap Share → Export to ZIP.",
+  "impGuideDaylio": "1. In Daylio, tap 'More' at the bottom\n2. Tap 'Export Entries'\n3. Choose 'CSV (table)' (works in the free version too)\n4. Pick where to save it (Downloads folder or Drive)\n\nMoods become LifeBox mood emojis and activities become tags.",
+  "impGuideText": "For a diary you kept in a notes app or elsewhere:\n1. Start each entry with a date on its own line (2024-03-01, 2024.03.01 and 2024/03/01 all work)\n2. Text after the date becomes the title; the lines below, up to the next date, become the entry\n3. Save everything as a .txt file (use your notes app's 'Export/Share as text' or a text editor on your computer)\n4. Move the file to your phone",
+  "impGuideCsv": "For a diary kept in Excel or Google Sheets:\n1. Put headers in the first row: date, title, content (mood and tags columns are optional)\n2. Write one entry per row\n3. Excel: Save As → 'CSV UTF-8 (Comma delimited)'\n   Google Sheets: File → Download → CSV\n4. Move the file to your phone",
+  "impCsvExample": "date,title,content,mood\n2024-03-01,Spring walk,Went to the park,good\n2024-03-02,,It rained,"
 }
