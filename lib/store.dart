@@ -210,6 +210,13 @@ class AppStore extends ChangeNotifier {
   Future<void> upsertDiary(DiaryEntry v) => _upsert(diaries, v, (e) => e.id);
   Future<void> removeDiary(String id) => _remove(diaries, id, (DiaryEntry e) => e.id);
 
+  /// 다른 앱에서 가져온 일기를 한 번에 추가
+  Future<void> addDiaries(List<DiaryEntry> list) async {
+    if (list.isEmpty) return;
+    diaries.insertAll(0, list);
+    await save();
+  }
+
   Future<void> upsertCareer(CareerItem v) => _upsert(careers, v, (e) => e.id);
   Future<void> saveProfile(Profile p) async {
     profile = p;

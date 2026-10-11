@@ -847,5 +847,72 @@
         "type": "int"
       }
     }
+  },
+  "impTitle": "다른 앱에서 일기 가져오기",
+  "impMenuSub": "Day One · Journey · Daylio · 텍스트 · CSV",
+  "impIntro": "다른 앱에서 내보낸 파일로 일기를 옮겨 와요. 지금 있는 일기는 그대로 두고 새로 추가만 해요.",
+  "impDayOne": "JSON으로 내보낸 zip 파일 (사진·태그 포함)",
+  "impJourney": "ZIP으로 내보낸 파일 (사진·태그 포함)",
+  "impDaylio": "CSV로 내보낸 파일 (기분·활동 → 태그)",
+  "impFmtCsv": "CSV 파일",
+  "impCsv": "날짜·제목·내용 열이 있는 표 (엑셀은 'CSV UTF-8'로 저장)",
+  "impFmtText": "텍스트 파일",
+  "impText": "날짜로 시작하는 줄마다 일기 하나 (.txt, .md)",
+  "impTextExample": "2024.03.01 봄 산책\n오늘은 공원에 다녀왔다.\n\n2024.03.02\n비가 왔다.",
+  "impPick": "파일 고르기",
+  "impReading": "파일을 읽는 중…",
+  "impFound": "일기 {count}개",
+  "impPhotos": "사진 {count}장",
+  "impDuplicates": "이미 있는 일기 {count}개는 건너뛰어요",
+  "impMore": "외 {count}개",
+  "impConfirm": "{count}개 가져오기",
+  "impOther": "다른 파일 고르기",
+  "impNote": "가져온 뒤에도 일기마다 수정하거나 지울 수 있어요",
+  "impDone": "일기 {count}개를 가져왔어요",
+  "impErrEncoding": "글자를 읽을 수 없어요. 파일을 UTF-8로 저장해 주세요 (엑셀: 다른 이름으로 저장 → CSV UTF-8)",
+  "impErrNoEntries": "가져올 일기를 찾지 못했어요. 날짜가 들어 있는지 확인해 주세요",
+  "impErrBroken": "파일이 손상되었거나 열 수 없어요",
+  "impErrUnsupported": "지원하지 않는 파일 형식이에요",
+  "@impFound": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@impPhotos": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@impDuplicates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@impMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@impConfirm": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@impDone": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

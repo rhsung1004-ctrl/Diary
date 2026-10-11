@@ -9,6 +9,7 @@ import '../reminder.dart';
 import '../theme.dart';
 import '../i18n.dart';
 import '../pro.dart';
+import 'import.dart';
 
 const _langNames = {'ko': '한국어', 'en': 'English', 'ja': '日本語'};
 const _privacyUrl = 'https://github.com/rhsung1004-ctrl/Diary/blob/main/PRIVACY.md';
@@ -40,6 +41,13 @@ class SettingsScreen extends StatelessWidget {
             _menu(context, Icons.notifications_outlined, tr.notifications, tr.setNotifSub, const _ReminderSection()),
             _menu(context, Icons.lock_outline, tr.security, tr.setSecuritySub, const _LockSection()),
             _menu(context, Icons.cloud_outlined, tr.driveBackup, tr.setBackupSub, const _BackupSection()),
+            ListTile(
+              leading: const Icon(Icons.move_to_inbox_outlined),
+              title: Text(tr.impTitle),
+              subtitle: Text(tr.impMenuSub),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ImportScreen())),
+            ),
             _menu(context, Icons.info_outline, tr.about, tr.setAboutSub, const _AboutSection()),
           ]),
         ),
