@@ -41,7 +41,12 @@ jobs:
           storeFile=upload-keystore.jks
           EOF
 
-      - run: flutter pub get
+      - name: Pub get
+        run: |
+          flutter pub get > pub.txt 2>&1 && exit 0
+          cat pub.txt
+          tail -25 pub.txt | while IFS= read -r line; do echo "::error::$line"; done
+          exit 1
 
       # 코드 오류를 Actions 화면에 바로 표시
       - name: Analyze
@@ -50,7 +55,12 @@ jobs:
           grep -E "^\s*error" analyze.txt | head -50 | while IFS= read -r line; do echo "::error::$line"; done
           ! grep -qE "^\s*error" analyze.txt
 
-      - run: flutter test
+      - name: Test
+        run: |
+          flutter test > test.txt 2>&1 && exit 0
+          cat test.txt
+          grep -E "Expected|Actual|Error|error|FAILED|\[E\]" test.txt | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+          exit 1
 
       # 빌드 번호(versionCode)는 매번 1씩 올라감 → 플레이스토어 업로드 조건 충족
       - name: Build APK (폰에 바로 설치용)

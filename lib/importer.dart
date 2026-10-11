@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:archive/archive_io.dart';
+import 'package:archive/archive.dart';
 
 import 'models.dart';
 import 'store.dart';
@@ -147,9 +147,8 @@ Object? _tryJson(String s) {
 }
 
 (ImportFormat, List<ImportItem>) _parseZip(String path) {
-  final input = InputFileStream(path);
   try {
-    final archive = ZipDecoder().decodeStream(input);
+    final archive = ZipDecoder().decodeBytes(File(path).readAsBytesSync());
     final names = <String>{for (final f in archive.files) if (f.isFile) f.name};
     final jsons = archive.files.where((f) =>
         f.isFile && f.name.toLowerCase().endsWith('.json') && !f.name.split('/').last.startsWith('.'));
@@ -196,17 +195,14 @@ Object? _tryJson(String s) {
     rethrow;
   } catch (_) {
     throw ImportException('broken');
-  } finally {
-    input.closeSync();
   }
 }
 
 /// zip 에서 필요한 사진만 꺼내 앱 사진 폴더에 저장 → {zip 경로: 새 파일 이름}
 Map<String, String> _extractPhotos(String path, Set<String> wanted, String photoDir) {
   final out = <String, String>{};
-  final input = InputFileStream(path);
   try {
-    final archive = ZipDecoder().decodeStream(input);
+    final archive = ZipDecoder().decodeBytes(File(path).readAsBytesSync());
     var i = 0;
     final stamp = DateTime.now().microsecondsSinceEpoch;
     for (final f in archive.files) {
@@ -223,8 +219,6 @@ Map<String, String> _extractPhotos(String path, Set<String> wanted, String photo
     }
   } catch (_) {
     // 사진을 못 꺼내도 글은 가져옴
-  } finally {
-    input.closeSync();
   }
   return out;
 }
