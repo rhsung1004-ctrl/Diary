@@ -40,14 +40,14 @@ class _ImportScreenState extends State<ImportScreen> {
   }
 
   Future<void> _pick() async {
-    FilePickerResult? res;
+    PlatformFile? file;
     try {
-      res = await AppLock.instance.runExternal(() => FilePicker.platform.pickFiles(type: FileType.any));
+      file = await AppLock.instance.runExternal(() => FilePicker.pickFile());
     } catch (e) {
       if (mounted) toast(context, tr.errGeneric(e));
       return;
     }
-    final path = res?.files.single.path;
+    final path = file?.path;
     if (path == null) return;
     setState(() {
       _busy = true;
