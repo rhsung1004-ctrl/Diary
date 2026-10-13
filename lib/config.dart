@@ -7,4 +7,4 @@ const kProProductId = 'lifebox_pro';
 
 /// 프로 잠금 스위치. 플레이 콘솔에 상품을 만들고 결제 테스트가 끝나면 true 로 바꿈.
 /// false 인 동안에는 모든 기능이 열려 있음.
-const kProGateEnabled = false;
+const kProGateEnabled = true; // 플레이 콘솔에 lifebox_pro 상품 등록 완료 (2026-10-14)
