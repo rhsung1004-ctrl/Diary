@@ -475,5 +475,6 @@
   "impGuideDaylio": "1. In Daylio, tap 'More' at the bottom\n2. Tap 'Export Entries'\n3. Choose 'CSV (table)' (works in the free version too)\n4. Pick where to save it (Downloads folder or Drive)\n\nMoods become LifeBox mood emojis and activities become tags.",
   "impGuideText": "For a diary you kept in a notes app or elsewhere:\n1. Start each entry with a date on its own line (2024-03-01, 2024.03.01 and 2024/03/01 all work)\n2. Text after the date becomes the title; the lines below, up to the next date, become the entry\n3. Save everything as a .txt file (use your notes app's 'Export/Share as text' or a text editor on your computer)\n4. Move the file to your phone",
   "impGuideCsv": "For a diary kept in Excel or Google Sheets:\n1. Put headers in the first row: date, title, content (mood and tags columns are optional)\n2. Write one entry per row\n3. Excel: Save As → 'CSV UTF-8 (Comma delimited)'\n   Google Sheets: File → Download → CSV\n4. Move the file to your phone",
-  "impCsvExample": "date,title,content,mood\n2024-03-01,Spring walk,Went to the park,good\n2024-03-02,,It rained,"
+  "impCsvExample": "date,title,content,mood\n2024-03-01,Spring walk,Went to the park,good\n2024-03-02,,It rained,",
+  "proNoProduct": "Couldn't load the purchase info yet. Please try again in a moment"
 }

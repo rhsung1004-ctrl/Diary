@@ -31,11 +31,7 @@ class ProService extends ChangeNotifier {
   Future<void> init() async {
     try {
       _sub = _iap.purchaseStream.listen(_onPurchases, onError: (Object e) => debugPrint('결제 오류: $e'));
-      available = await _iap.isAvailable();
-      if (!available) return;
-      final res = await _iap.queryProductDetails({kProProductId});
-      if (res.productDetails.isNotEmpty) product = res.productDetails.first;
-      notifyListeners();
+      if (!await loadProduct()) return;
       // 다른 폰·재설치 후에도 프로 유지
       await _iap.restorePurchases();
     } catch (e) {
@@ -43,11 +39,40 @@ class ProService extends ChangeNotifier {
     }
   }
 
+  /// 상품 정보 불러오기 (실패하면 결제 화면을 열 때·구매할 때 다시 시도)
+  Future<bool> loadProduct() async {
+    if (product != null) return true;
+    try {
+      available = await _iap.isAvailable();
+      if (available) {
+        final res = await _iap.queryProductDetails({kProProductId});
+        if (res.error != null) debugPrint('상품 조회 오류: ${res.error}');
+        if (res.notFoundIDs.isNotEmpty) debugPrint('상품을 찾지 못함: ${res.notFoundIDs}');
+        if (res.productDetails.isNotEmpty) product = res.productDetails.first;
+      }
+    } catch (e) {
+      debugPrint('상품 조회 실패: $e');
+    }
+    notifyListeners();
+    return product != null;
+  }
+
   String get priceLabel => product?.price ?? '₩3,900';
 
   Future<void> buy() async {
-    if (!available || product == null) {
+    if (product == null) {
+      busy = true;
+      notifyListeners();
+      await loadProduct();
+      busy = false;
+      notifyListeners();
+    }
+    if (!available) {
       onMessage?.call(tr.proUnavailable);
+      return;
+    }
+    if (product == null) {
+      onMessage?.call(tr.proNoProduct);
       return;
     }
     busy = true;
@@ -153,6 +178,7 @@ class _ProScreenState extends State<ProScreen> {
     pro.onMessage = (m) {
       if (mounted) toast(context, m);
     };
+    pro.loadProduct(); // 앱 시작 때 못 불러왔으면 다시 시도
   }
 
   @override
