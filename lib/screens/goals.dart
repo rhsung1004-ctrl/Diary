@@ -116,7 +116,7 @@ class GoalCard extends StatelessWidget {
             Text(
               g.tasks.isEmpty
                   ? (g.isComplete ? tr.goalAchieved : tr.goalAddTasksHint)
-                  : tr.goalTaskProgress(g.doneTasks, g.tasks.length, (g.progress * 100).round()),
+                  : tr.goalTaskProgress(g.doneTasks, g.tasks.length),
               style: t.textTheme.bodySmall?.copyWith(color: t.colorScheme.onSurfaceVariant),
             ),
           ]),
@@ -275,9 +275,20 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
             ),
             secondary: IconButton(
               icon: const Icon(Icons.close, size: 20),
+              tooltip: tr.delete,
               onPressed: () {
+                final removed = d.tasks[i];
                 setState(() => d.tasks.removeAt(i));
                 markDirty();
+                toast(context, tr.goalTaskDeleted(removed.text),
+                    action: SnackBarAction(
+                      label: tr.undo,
+                      onPressed: () {
+                        if (!mounted) return;
+                        setState(() => d.tasks.insert(i.clamp(0, d.tasks.length), removed));
+                        markDirty();
+                      },
+                    ));
               },
             ),
             onChanged: (v) {
@@ -310,7 +321,14 @@ class _GoalEditorState extends State<GoalEditor> with DirtyGuard<GoalEditor> {
           title: Text(tr.goalMarkDone),
           subtitle: Text(tr.goalMarkDoneSub),
           value: d.done,
-          onChanged: (v) {
+          onChanged: (v) async {
+            // 할 일이 남았는데 달성으로 표시하면 한 번 확인
+            final left = d.tasks.where((t) => !t.done).length;
+            if (v && left > 0 &&
+                !await confirmDialog(context, tr.goalMarkDoneLeftTitle, tr.goalMarkDoneLeftBody(left), tr.goalMarkDone)) {
+              return;
+            }
+            if (!mounted) return;
             setState(() => d.done = v);
             markDirty();
           },

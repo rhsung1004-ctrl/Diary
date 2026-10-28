@@ -205,7 +205,13 @@ class AppStore extends ChangeNotifier {
   Future<void> removeBucket(String id) => _remove(buckets, id, (BucketItem e) => e.id);
 
   Future<void> upsertGoal(Goal v) => _upsert(goals, v, (e) => e.id);
-  Future<void> removeGoal(String id) => _remove(goals, id, (Goal e) => e.id);
+  /// 목표를 지워도 연결된 일기는 남기고 연결만 해제
+  Future<void> removeGoal(String id) {
+    for (final e in diaries) {
+      if (e.goalId == id) e.goalId = null;
+    }
+    return _remove(goals, id, (Goal e) => e.id);
+  }
 
   Future<void> upsertDiary(DiaryEntry v) => _upsert(diaries, v, (e) => e.id);
   Future<void> removeDiary(String id) => _remove(diaries, id, (DiaryEntry e) => e.id);

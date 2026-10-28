@@ -244,7 +244,7 @@ class _Bar extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(children: [
-        SizedBox(width: 72, child: label),
+        SizedBox(width: 92, child: label),
         Expanded(
           child: LayoutBuilder(
             builder: (_, box) => Align(
@@ -286,7 +286,14 @@ class _MoodBars extends StatelessWidget {
     return Column(children: [
       for (final m in moods)
         _Bar(
-          label: Text(m, style: const TextStyle(fontSize: 20)),
+          label: Row(children: [
+            Text(m, style: const TextStyle(fontSize: 18)),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(moodName(m),
+                  maxLines: 1, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.labelMedium),
+            ),
+          ]),
           value: counts[m]!,
           max: max,
           valueText: '${counts[m]}',

@@ -201,7 +201,8 @@ class _ReviewCard extends StatelessWidget {
             Row(children: [
               stat('📔', tr.countEntries(data.diaries), tr.rvDiarySub(data.daysWritten)),
               stat('🔥', tr.countDays(data.longestStreak), tr.rvLongest),
-              stat(data.topMood ?? '🙂', data.topMood == null ? '-' : tr.rvTimes(data.topMoodCount), tr.rvTopMood),
+              stat(data.topMood ?? '🙂', data.topMood == null ? '-' : moodName(data.topMood!),
+                  data.topMood == null ? tr.rvTopMood : tr.rvTopMoodCount(data.topMoodCount)),
             ]),
             SizedBox(height: 20 * k),
             Container(height: 1, color: Colors.white.withValues(alpha: 0.3)),

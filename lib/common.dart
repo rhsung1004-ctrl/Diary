@@ -169,3 +169,16 @@ mixin DirtyGuard<T extends StatefulWidget> on State<T> {
         child: child,
       );
 }
+
+/// 기분 이모지의 이름 (이모지 뜻이 사람마다 달라 보일 수 있어서 함께 표시)
+String moodName(String emoji) => switch (emoji) {
+      '😊' => tr.moodHappy,
+      '😆' => tr.moodExcited,
+      '🥰' => tr.moodLoved,
+      '😌' => tr.moodCalm,
+      '😐' => tr.moodSoso,
+      '😢' => tr.moodSad,
+      '😠' => tr.moodAngry,
+      '😴' => tr.moodTired,
+      _ => '',
+    };

@@ -84,8 +84,17 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               )
-            else
+            else ...[
               ...todayDiaries.map((e) => DiaryCard(entry: e)),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  icon: const Icon(Icons.add, size: 18),
+                  label: Text(tr.writeAnother),
+                  onPressed: () => openDiaryEditor(context, null),
+                ),
+              ),
+            ],
 
             // 2. 진행 중인 목표
             SectionTitle(tr.goalsInProgress, onMore: activeGoals.isEmpty ? null : () => onNavigate(2)),

@@ -398,11 +398,13 @@ class _DiaryEditorState extends State<DiaryEditor>
           },
         ),
         const SizedBox(height: 4),
-        Text(tr.todayMood, style: Theme.of(context).textTheme.titleSmall),
+        Text(d.mood.isEmpty ? tr.todayMood : '${tr.todayMood} · ${moodName(d.mood)}',
+            style: Theme.of(context).textTheme.titleSmall),
         const SizedBox(height: 8),
         Wrap(spacing: 4, runSpacing: 4, children: [
           for (final m in moods)
             ChoiceChip(
+              tooltip: moodName(m),
               label: Text(m, style: const TextStyle(fontSize: 20)),
               selected: d.mood == m,
               showCheckmark: false,
